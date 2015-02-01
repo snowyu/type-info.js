@@ -1,0 +1,85 @@
+{
+  "name": "type-info",
+  "description": "the mini run-time type infomation of object. It could be stream-able.",
+  "version": "0.0.0",
+  "homepage": "https://github.com/snowyu/type-info.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/snowyu/type-info.js.git"
+  },
+  "files": [
+    "README.md",
+    "LICENSE-MIT",
+    "*.js",
+    "test",
+    "src",
+    "lib"
+  ],
+  "keywords": [
+    "type",
+    "infomation",
+    "object",
+    "class",
+    "klass"
+  ],
+  "dependencies": {
+    "custom-factory": "~1.0.1",
+    "inherits-ex": "~1.0.2"
+  },
+  "devDependencies": {
+    "chai": "~1.10.0",
+    "grunt": "~0.4.5",
+    "grunt-contrib-clean": "~0.6.0",
+    "grunt-contrib-coffee": "~0.12.0",
+    "grunt-contrib-copy": "~0.7.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-mocha-test": "~0.12.6",
+    "grunt-newer": "~0.8.0",
+    "grunt-release": "~0.9.0",
+    "mocha": "~2.1.0",
+    "rimraf": "~2.2.8",
+    "shasum": "1.0.0",
+    "sinon": "~1.12.2",
+    "sinon-chai": "~2.6.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "contributors": [
+    {
+      "name": "Riceball LEE",
+      "email": "snowyu.lee@gmail.com",
+      "url": "https://github.com/snowyu"
+    }
+  ],
+  "maintainers": [
+    {
+      "name": "Riceball LEE",
+      "email": "snowyu.lee@gmail.com"
+    }
+  ],
+  "pre-commit": [
+    "test"
+  ],
+  "bugs": {
+    "url": "https://github.com/snowyu/type-info.js/issues"
+  },
+  "license": "MIT",
+  "stability": "unstable",
+  "testling": {
+    "files": "test/*.js",
+    "browsers": [
+      "ie/8..latest",
+      "firefox/17..latest",
+      "firefox/nightly",
+      "chrome/22..latest",
+      "chrome/canary",
+      "opera/12..latest",
+      "opera/next",
+      "safari/5.1..latest",
+      "ipad/6.0..latest",
+      "iphone/6.0..latest",
+      "android-browser/4.2..latest"
+    ]
+  }
+}
