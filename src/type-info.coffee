@@ -14,15 +14,26 @@ module.exports = class Type
   initialize: (aOptions)->
     @encoding = aOptions.encoding if aOptions and aOptions.encoding
   path: -> 
-    result = getProtoChain(@constructor)
+    result = getProtoChain(@Class)
     result.push Type.ROOT_NAME
     result.reverse()
-    #result.push(@name)
     result
-  encode: (aValue)->
-  decode: (aString)->
-  # create a TypeInfo class from the json string.
-  @createFromJson: (aString)->
-  toJson: ->
+  encode: (aValue, aCheckValidity, aOptions)->
+    throw new TypeError(aValue + ' is not a valid ' + @name) if aCheckValidity isnt false and not @validate(aValue)
+    aValue = @encoding.encode aValue if @encoding
+    aValue = @_encode aValue if @_encode
+    aValue
+  decode: (aString, aCheckValidity, aOptions)->
+    aString = @encoding.decode aString if @encoding
+    aString = @_decode aString, aCheckValidity if @_decode
+    aString
+  validate: (aValue)->true
+  # Get a Type class from the json string.
+  @fromJson: (aString)->
+    Type JSON.parse aString
+  toString: ->
     result = JSON.stringify @
+    result.name = @name
+    result.fullName = @path()
+    result
 
