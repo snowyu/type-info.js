@@ -1,7 +1,7 @@
-extend    = require './util/extend'
-isFloat   = require './util/is/string/float'
-isNumber  = require './util/is/type/number'
-isString  = require './util/is/type/string'
+extend    = require 'util-ex/lib/extend'
+isFloat   = require 'util-ex/lib/is/string/float'
+isNumber  = require 'util-ex/lib/is/type/number'
+isString  = require 'util-ex/lib/is/type/string'
 
 module.exports = Type = require './type-info'
 

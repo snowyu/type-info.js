@@ -1,7 +1,7 @@
 {
   "name": "type-info",
   "description": "the mini run-time type infomation of object. It could be stream-able.",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "homepage": "https://github.com/snowyu/type-info.js",
   "repository": {
     "type": "git",
@@ -24,7 +24,8 @@
   ],
   "dependencies": {
     "custom-factory": "~1.1.2",
-    "inherits-ex": "~1.0.5"
+    "inherits-ex": "~1.0.5",
+    "util-ex": "0.0.1"
   },
   "devDependencies": {
     "chai": "~1.10.0",

@@ -1,11 +1,11 @@
-extend = require './extend'
+extend = require 'util-ex/lib/extend'
 module.exports = Type = require './type-info'
 
 
 register  = Type.register
 aliases   = Type.aliases
-isNumber  = (v)->'number' is typeof v
-isString  = (v)->'string' is typeof v
+isNumber  = require 'util-ex/lib/is/type/number'
+isString  = require 'util-ex/lib/is/type/string'
 
 class String
   register String

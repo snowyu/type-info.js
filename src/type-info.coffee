@@ -1,4 +1,5 @@
-factory = require("custom-factory")
+factory   = require("custom-factory")
+isObject  = require("util-ex/lib/is/type/object")
 
 getProtoChain = (ctor)->
   result = while ctor and ctor isnt Type
