@@ -23,8 +23,8 @@
     "klass"
   ],
   "dependencies": {
-    "custom-factory": "~1.0.1",
-    "inherits-ex": "~1.0.2"
+    "custom-factory": "~1.1.2",
+    "inherits-ex": "~1.0.5"
   },
   "devDependencies": {
     "chai": "~1.10.0",
