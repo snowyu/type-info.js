@@ -9,7 +9,7 @@ chai.use(sinonChai)
 Type            = require '../src/number'
 setImmediate    = setImmediate || process.nextTick
 
-describe "Number", ->
+describe "NumberType", ->
   number = Type("Number")
   it "should have Number type", ->
     should.exist number

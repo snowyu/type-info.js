@@ -9,7 +9,7 @@ chai.use(sinonChai)
 Type            = require '../src/string'
 setImmediate    = setImmediate || process.nextTick
 
-describe "String", ->
+describe "StringType", ->
   string = Type("String")
   it "should have String type", ->
     should.exist string

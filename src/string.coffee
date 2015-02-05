@@ -7,14 +7,15 @@ aliases   = Type.aliases
 isNumber  = require 'util-ex/lib/is/type/number'
 isString  = require 'util-ex/lib/is/type/string'
 
-class String
-  register String
-  aliases String, 'string', 'str'
+class StringType
+  register StringType
+  aliases StringType, 'string', 'str'
 
   initialize: (aOptions)->
     super(aOptions)
     if aOptions
       extend @, aOptions, (k,v)->k in ['min', 'max'] and isNumber v
+      throw new TypeError('max should be equal or greater than min') if @min? and @max? and @max < @min
     return
   validate: (aValue)->
     result = isString(aValue)
