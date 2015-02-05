@@ -4,11 +4,75 @@
 [![downloads](https://img.shields.io/npm/dm/type-info.svg)](https://npmjs.org/package/type-info) 
 [![license](https://img.shields.io/npm/l/type-info.svg)](https://npmjs.org/package/type-info) 
 
-the mini Run-time Type Infomation of Object. It could be stream-able.
+The mini Run-time Type Infomation.
+
+all typed value could be encode to string. The encoded string could be decode to value.
 
 ## Usage
 
-```js
+### Develope a new Type:
+
+```coffee
+
+extend    = require 'util-ex/lib/extend'
+isFloat   = require 'util-ex/lib/is/string/float'
+isInt     = require 'util-ex/lib/is/string/int'
+isNumber  = require 'util-ex/lib/is/type/number'
+isString  = require 'util-ex/lib/is/type/string'
+
+module.exports = Type = require 'type-info'
+
+
+register  = Type.register
+aliases   = Type.aliases
+
+class NumberType
+  register NumberType
+  aliases NumberType, 'number'
+
+  initialize: (aOptions)->
+    super(aOptions)
+    if aOptions
+      extend @, aOptions, (k,v)->k in ['min', 'max'] and isNumber v
+    return
+  _encode: (aValue)->
+    aValue = String(aValue)
+  _decode: (aString, checkValidity)->
+    if isFloat aString
+      aString = parseFloat(aString)
+    else if checkValidity isnt false
+      throw new TypeError('string "'+aString+ '" is not a valid number')
+    aString
+  validate: (aValue)->
+    aValue = @decode(aValue, false) if isString aValue
+    result = isNumber aValue
+    result = aValue >= @min if @min
+    result = aValue <= @max if result and @max
+    result
+
+```
+### User
+
+```coffee
+Type = require 'type-info'
+
+# get number type info object:
+
+numberType = Type 'Number', min:1, max:6
+
+assert.equal numberType, Type('Number')
+
+# get Number Type Class:
+
+NumberType = Type.registeredClass 'Number'
+
+# create a number value:
+
+n = numberType.create(2)
+# or n = new NumberType min:1, max: 6, value:2
+
+assert.equal n+2, 4
+
 
 ```
 
