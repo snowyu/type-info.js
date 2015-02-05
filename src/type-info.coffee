@@ -1,6 +1,7 @@
-factory   = require("custom-factory")
-isObject  = require("util-ex/lib/is/type/object")
-extend    = require("util-ex/lib/_extend")
+factory     = require("custom-factory")
+isObject    = require("util-ex/lib/is/type/object")
+isFunction  = require("util-ex/lib/is/type/function")
+extend      = require("util-ex/lib/_extend")
 
 getProtoChain = (ctor)->
   result = while ctor and ctor isnt Type
@@ -14,7 +15,12 @@ module.exports = class Type
   @ROOT_NAME: 'type'
   constructor: (aTypeName, aOptions)-> return super
   initialize: (aOptions)->
-    @encoding = aOptions.encoding if aOptions and aOptions.encoding
+    if aOptions and aOptions.encoding
+      encoding = aOptions.encoding
+      if isFunction(encoding.encode) and isFunction(encoding.decode)
+        @encoding = encoding
+      else
+        throw new TypeError "encoding should have encode and decode functions."
   path: ->
     @pathArray().join '/'
   pathArray: ->
