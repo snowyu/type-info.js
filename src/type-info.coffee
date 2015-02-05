@@ -20,12 +20,18 @@ module.exports = class Type
     result.reverse()
     result
   encode: (aValue, aCheckValidity, aOptions)->
+    if isObject aCheckValidity
+      aOptions = aCheckValidity
+      aCheckValidity = aOptions.checkValidity
     throw new TypeError(aValue + ' is not a valid ' + @name) if aCheckValidity isnt false and not @validate(aValue)
-    aValue = @encoding.encode aValue if @encoding
+    aValue = @encoding.encode aValue, aOptions if @encoding
     aValue = @_encode aValue if @_encode
     aValue
   decode: (aString, aCheckValidity, aOptions)->
-    aString = @encoding.decode aString if @encoding
+    if isObject aCheckValidity
+      aOptions = aCheckValidity
+      aCheckValidity = aOptions.checkValidity
+    aString = @encoding.decode aString, aOptions if @encoding
     aString = @_decode aString, aCheckValidity if @_decode
     aString
   validate: (aValue)->true
