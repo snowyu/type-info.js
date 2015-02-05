@@ -15,13 +15,13 @@ class NumberType
   constructor: TypeInfo
 
 describe "TypeInfo", ->
-  describe ".path()", ->
+  describe ".pathArray()", ->
     it "should get default type path array", ->
       t = TypeInfo('Number')
-      t.path().should.be.deep.equal ['type','Number']
+      t.pathArray().should.be.deep.equal ['type','Number']
     it "should get cutomize root type path array", ->
       TypeInfo.ROOT_NAME = 'atype'
       t = TypeInfo('Number')
-      t.path().should.be.deep.equal ['atype','Number']
+      t.pathArray().should.be.deep.equal ['atype','Number']
 
 

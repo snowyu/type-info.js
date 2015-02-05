@@ -16,9 +16,6 @@ class String
     if aOptions
       extend @, aOptions, (k,v)->k in ['min', 'max'] and isNumber v
     return
-  encode: (aValue)->
-    aValue = String(aValue)
-    return super(aValue)
   validate: (aValue)->
     result = isString(aValue)
     return result unless result
