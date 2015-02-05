@@ -1,5 +1,6 @@
 factory   = require("custom-factory")
 isObject  = require("util-ex/lib/is/type/object")
+extend    = require("util-ex/lib/_extend")
 
 getProtoChain = (ctor)->
   result = while ctor and ctor isnt Type
@@ -14,11 +15,12 @@ module.exports = class Type
   constructor: (aTypeName, aOptions)-> return super
   initialize: (aOptions)->
     @encoding = aOptions.encoding if aOptions and aOptions.encoding
-  path: -> 
+  path: ->
+    @pathArray().join '/'
+  pathArray: ->
     result = getProtoChain(@Class)
     result.push Type.ROOT_NAME
     result.reverse()
-    result
   encode: (aValue, aCheckValidity, aOptions)->
     if isObject aCheckValidity
       aOptions = aCheckValidity
@@ -33,14 +35,16 @@ module.exports = class Type
       aCheckValidity = aOptions.checkValidity
     aString = @encoding.decode aString, aOptions if @encoding
     aString = @_decode aString, aCheckValidity if @_decode
+    throw new TypeError(aString + ' is not a valid ' + @name) if aCheckValidity isnt false and not @validate(aString)
     aString
   validate: (aValue)->true
   # Get a Type class from the json string.
   @fromJson: (aString)->
     Type JSON.parse aString
   toString: ->
-    result = JSON.stringify @
+    result = extend {}, @
     result.name = @name
     result.fullName = @path()
+    result = JSON.stringify result
     result
 
