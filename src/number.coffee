@@ -14,8 +14,7 @@ class NumberType
   register NumberType
   aliases NumberType, 'number'
 
-  initialize: (aOptions)->
-    super(aOptions)
+  _initialize: (aOptions)->
     if aOptions
       extend @, aOptions, (k,v)->k in ['min', 'max'] and isNumber v
       throw new TypeError('max should be equal or greater than min') if @min? and @max? and @max < @min
@@ -27,12 +26,16 @@ class NumberType
       aString = parseInt(aString)
     else if isFloat aString
       aString = parseFloat(aString)
-    else if aOptions and aOptions.checkValidity isnt false
-      throw new TypeError('string "'+aString+ '" is not a valid number')
+    else
+      aString = undefined
     aString
-  _validate: (aValue)->
-    aValue = @decodeString(aValue) if isString aValue
+  _isEncoded: (aValue)->isString(aValue)
+  _validate: (aValue, aOptions)->
     result = isNumber aValue
-    result = aValue >= @min if @min
-    result = aValue <= @max if result and @max
+    if result
+      if aOptions
+        vMin = aOptions.min
+        vMax = aOptions.max
+        result = aValue >= vMin if vMin?
+        result = aValue <= vMax if result and vMax?
     result

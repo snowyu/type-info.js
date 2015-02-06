@@ -53,9 +53,22 @@ describe "NumberType", ->
     it "should create a value", ->
       n = number.create(12)
       assert.equal Number(n), 12
+    it "should not create a value (exceed limits)", ->
+      assert.throw number.create.bind(number, 1234)
   describe ".assign()", ->
     it "should assign a value", ->
       n = number.create(12)
       assert.equal Number(n.assign(13)), 13
 
+  describe ".validate()", ->
+    t = number.cloneType min: 1, max: 10
+    it "should validate a value and do not raise error", ->
+      t.validate(2).should.be.equal true
+      t.validate(0, false).should.be.equal false
+      t.validate(11, false).should.be.equal false
+    it "should validate a value and raise error", ->
+      should.throw t.validate.bind(t, 0), 'is not a valid'
+      should.throw t.validate.bind(t, 11), 'is not a valid'
+    it "should validate an encoded value", ->
+      t.validate("5").should.be.equal true
 

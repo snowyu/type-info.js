@@ -51,8 +51,10 @@ describe "StringType", ->
       result.should.be.deep.equal max:3,min:2,name:"String",fullName:"type/String", value:"asd"
   describe ".createValue()/.create()", ->
     it "should create a value", ->
-      s = string.create("1234")
-      assert.equal String(s), "1234"
+      s = string.create("123")
+      assert.equal String(s), "123"
+    it "should not create a value (exceed length limits)", ->
+      assert.throw string.create.bind(string, "1234")
   describe ".assign()", ->
     it "should assign a value", ->
       n = string.create('12')
