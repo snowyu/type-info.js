@@ -23,7 +23,7 @@
     "klass"
   ],
   "dependencies": {
-    "custom-factory": "~1.2.6",
+    "custom-factory": "~1.2.7",
     "inherits-ex": "~1.0.5",
     "util-ex": "0.2.1"
   },
