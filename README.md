@@ -6,17 +6,34 @@
 
 The mini Run-time Type Infomation.
 
-all typed value could be encode to string. The encoded string could be decode to value.
+all typed value could be encode to a string. The encoded string could be decode to a value.
+
+
+## Concepts
+
+* Primitive Types
+  * All registered types are primitive types.
+* Virtual Types
+  * It's a object of a primitive type.
+  * It can not be registered.
+  * It could be unlimited number of virtual types.
 
 ## Usage
 
 ### Develope a new Type:
 
+These methods should be overrided:
+
+* `_encode(aValue, aOptions)`: convert a value to string.
+* `_decode(aString, aOptions)`: convert a string to a value. return undefined if decode failed.
+* `_initialize(aOptions)`: initialize the options to the type object.
+* `_validate(aValue, aOptions)`: validate a value whether is valid.
+* `_isEncoded(aValue)`: check the value whether is encoded.
+
 ```coffee
 
 extend    = require 'util-ex/lib/extend'
 isFloat   = require 'util-ex/lib/is/string/float'
-isInt     = require 'util-ex/lib/is/string/int'
 isNumber  = require 'util-ex/lib/is/type/number'
 isString  = require 'util-ex/lib/is/type/string'
 
@@ -30,8 +47,7 @@ class NumberType
   register NumberType
   aliases NumberType, 'number'
 
-  initialize: (aOptions)->
-    super(aOptions)
+  _initialize: (aOptions)->
     if aOptions
       extend @, aOptions, (k,v)->k in ['min', 'max'] and isNumber v
     return
@@ -40,14 +56,18 @@ class NumberType
   _decode: (aString, aOptions)->
     if isFloat aString
       aString = parseFloat(aString)
-    else if aOptions and aOptions.checkValidity isnt false
-      throw new TypeError('string "'+aString+ '" is not a valid number')
+    else
+      aString = undefined
     aString
-  _validate: (aValue)->
-    aValue = @decodeString(aValue) if isString aValue
+  _isEncoded: (aValue) -> isString aValue
+  _validate: (aValue, aOptions)->
     result = isNumber aValue
-    result = aValue >= @min if @min
-    result = aValue <= @max if result and @max
+    if result
+      if aOptions
+        vMin = aOptions.min
+        vMax = aOptions.max
+        result = aValue >= vMin if vMin?
+        result = aValue <= vMax if result and vMax?
     result
 
 ```
@@ -56,13 +76,13 @@ class NumberType
 ```coffee
 Type = require 'type-info'
 
-# get number type info object:
-
+# get number type info object(Virtual Type):
+# you can treat it as a gobal temporary type object.
 numberType = Type 'Number', min:1, max:6
 
 assert.equal numberType, Type('Number')
 
-# get Number Type Class:
+# get Number Type Class(Primitive Type):
 
 NumberType = Type.registeredClass 'Number'
 
@@ -70,7 +90,6 @@ NumberType = Type.registeredClass 'Number'
 
 n = numberType.create(2)
 # or n = numberType.createValue(2)
-# or n = new NumberType min:1, max: 6, value:2
 
 assert.ok    n.isValid()
 assert.equal n+2, 4
@@ -78,6 +97,10 @@ assert.throw numberType.validate.bind(numberType, 13)
 
 n.assign 5
 assert.equal n+2, 7
+
+# re-initialize the numberType:
+numberType.initialize min:3, max:10
+# or numberType.min = 3, numberType.max = 10
 
 ```
 
