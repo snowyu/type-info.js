@@ -31,8 +31,31 @@ describe "NumberType", ->
       number.decode("25").should.be.equal 25
     it "should throw error when decode invalid string number", ->
       should.throw number.decode.bind(number, 'as'), "is not a valid"
-  describe ".toString()", ->
-    it "should get type info via string", ->
-      String(number).should.be.equal '{"max":34,"min":5,"name":"Number","fullName":"type/Number"}'
+  describe ".toObject()", ->
+    it "should get type info to obj", ->
+      result = number.toObject typeOnly: true
+      result.should.be.deep.equal "max":34,"min":5,"name":"Number","fullName":"type/Number"
+    it "should get value info to obj", ->
+      result = number.create(13)
+      result = result.toObject()
+      result.should.be.deep.equal "max":34,"min":5,"name":"Number","fullName":"type/Number", value: 13
+  describe ".toJson()", ->
+    it "should get type info via json string", ->
+      result = number.toJson typeOnly: true
+      result = JSON.parse result
+      result.should.be.deep.equal "max":34,"min":5,"name":"Number","fullName":"type/Number"
+    it "should get value info to obj", ->
+      result = number.create(13)
+      result = result.toJson()
+      result = JSON.parse result
+      result.should.be.deep.equal "max":34,"min":5,"name":"Number","fullName":"type/Number", value: 13
+  describe ".createValue()/.create()", ->
+    it "should create a value", ->
+      n = number.create(12)
+      assert.equal Number(n), 12
+  describe ".assign()", ->
+    it "should assign a value", ->
+      n = number.create(12)
+      assert.equal Number(n.assign(13)), 13
 
 

@@ -35,16 +35,16 @@ class NumberType
     if aOptions
       extend @, aOptions, (k,v)->k in ['min', 'max'] and isNumber v
     return
-  _encode: (aValue)->
+  _encode: (aValue, aOptions)->
     aValue = String(aValue)
-  _decode: (aString, checkValidity)->
+  _decode: (aString, aOptions)->
     if isFloat aString
       aString = parseFloat(aString)
-    else if checkValidity isnt false
+    else if aOptions and aOptions.checkValidity isnt false
       throw new TypeError('string "'+aString+ '" is not a valid number')
     aString
-  validate: (aValue)->
-    aValue = @decode(aValue, false) if isString aValue
+  _validate: (aValue)->
+    aValue = @decodeString(aValue) if isString aValue
     result = isNumber aValue
     result = aValue >= @min if @min
     result = aValue <= @max if result and @max
@@ -69,10 +69,15 @@ NumberType = Type.registeredClass 'Number'
 # create a number value:
 
 n = numberType.create(2)
+# or n = numberType.createValue(2)
 # or n = new NumberType min:1, max: 6, value:2
 
+assert.ok    n.isValid()
 assert.equal n+2, 4
+assert.throw numberType.validate.bind(numberType, 13)
 
+n.assign 5
+assert.equal n+2, 7
 
 ```
 

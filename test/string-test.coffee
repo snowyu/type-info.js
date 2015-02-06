@@ -31,8 +31,31 @@ describe "StringType", ->
       string.decode("25").should.be.equal "25"
     it "should throw error when decode invalid string(exceed length limits)", ->
       should.throw string.decode.bind(string, 'asddf'), "is not a valid"
-  describe ".toString()", ->
-    it "should get type info via string", ->
-      String(string).should.be.equal '{"max":3,"min":2,"name":"String","fullName":"type/String"}'
+  describe ".toObject()", ->
+    it "should get type info to obj", ->
+      result = string.toObject typeOnly: true
+      result.should.be.deep.equal max:3,min:2,name:"String",fullName:"type/String"
+    it "should get value info to obj", ->
+      result = string.create("asd")
+      result = result.toObject() 
+      result.should.be.deep.equal max:3,min:2,name:"String",fullName:"type/String", value:"asd"
+  describe ".toJson()", ->
+    it "should get type info via json string", ->
+      result = string.toJson typeOnly: true
+      result = JSON.parse result
+      result.should.be.deep.equal max:3,min:2,name:"String",fullName:"type/String"
+    it "should get value info via json string", ->
+      result = string.create("asd")
+      result = result.toJson() 
+      result = JSON.parse result
+      result.should.be.deep.equal max:3,min:2,name:"String",fullName:"type/String", value:"asd"
+  describe ".createValue()/.create()", ->
+    it "should create a value", ->
+      s = string.create("1234")
+      assert.equal String(s), "1234"
+  describe ".assign()", ->
+    it "should assign a value", ->
+      n = string.create('12')
+      assert.equal String(n.assign('bb')), 'bb'
 
 
