@@ -124,7 +124,7 @@ module.exports = class Type
     aString = JSON.parse aString
     Type.create aString.name, aString
       
-  toString: ->String(@value) if @value
+  toString: ->if @value then String(@value) else '[type '+ @name+']'
   toJson: (aOptions)->
     result = @toObject(aOptions)
     result = JSON.stringify result

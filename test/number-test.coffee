@@ -39,6 +39,14 @@ describe "NumberType", ->
       result = number.create(13)
       result = result.toObject()
       result.should.be.deep.equal "max":34,"min":5,"name":"Number","fullName":"type/Number", value: 13
+  describe ".toString()", ->
+    it "should get type name if no value", ->
+      result = String(number)
+      result.should.be.equal '[type Number]'
+    it "should get value string if value", ->
+      result = number.create(13)
+      result = String(result)
+      result.should.be.equal '13'
   describe ".toJson()", ->
     it "should get type info via json string", ->
       result = number.toJson typeOnly: true
