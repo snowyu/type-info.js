@@ -18,6 +18,18 @@ all typed value could be encode to a string. The encoded string could be decode 
   * It can not be registered.
   * It could be unlimited number of virtual types.
 
+
+## todo
+
+* separate the value from type
+  * value.$type -> point to a virtual type.
+* object value does not work yet.
+* Cache the Virtual Types
+  * search via name:
+    * named the virtual type first
+    * hashed to make name the virtual type if no name given 
+
+
 ## Usage
 
 ### Develope a new Type:
