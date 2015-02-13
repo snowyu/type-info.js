@@ -22,6 +22,12 @@ class StringType
     if aOptions
       vMin = aOptions.min
       vMax = aOptions.max
-      result = aValue.length >= vMin if vMin
-      result = aValue.length <= vMax if result and vMax
+      if vMin?
+        result = aValue.length >= vMin
+        if not result
+          @error "should be equal or greater than minimum length: " + vMin
+      if result and vMax?
+        result = aValue.length <= vMax
+        if not result
+          @error "should be equal or less than maximum length: " + vMax
     result

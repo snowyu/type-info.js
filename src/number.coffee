@@ -36,6 +36,12 @@ class NumberType
       if aOptions
         vMin = aOptions.min
         vMax = aOptions.max
-        result = aValue >= vMin if vMin?
-        result = aValue <= vMax if result and vMax?
+        if vMin?
+          result = aValue >= vMin
+          if not result
+            @error "should be equal or greater than minimum value: " + vMin
+        if result and vMax?
+          result = aValue <= vMax
+          if not result
+            @error "should be equal or less than maximum value: " + vMax
     result
