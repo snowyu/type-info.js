@@ -1,12 +1,14 @@
-factory     = require("custom-factory")
-isObject    = require("util-ex/lib/is/type/object")
-isFunction  = require("util-ex/lib/is/type/function")
-isString    = require("util-ex/lib/is/type/string")
-isUndefined = require("util-ex/lib/is/type/undefined")
-#isBoolean   = require("util-ex/lib/is/type/boolean")
-extend      = require("util-ex/lib/extend")
-createObject= require("inherits-ex/lib/createObject")
-try Codec   = require("buffer-codec")
+factory         = require("custom-factory")
+isObject        = require("util-ex/lib/is/type/object")
+isFunction      = require("util-ex/lib/is/type/function")
+isString        = require("util-ex/lib/is/type/string")
+isArray         = require("util-ex/lib/is/type/array")
+isUndefined     = require("util-ex/lib/is/type/undefined")
+#isBoolean     = require("util-ex/lib/is/type/boolean")
+extend          = require("util-ex/lib/extend")
+defineProperty  = require("util-ex/lib/defineProperty")
+createObject    = require("inherits-ex/lib/createObject")
+try Codec       = require("buffer-codec")
 
 getProtoChain = (ctor)->
   result = while ctor and ctor isnt Type
@@ -21,6 +23,7 @@ module.exports = class Type
   constructor: (aTypeName, aOptions)->
     return super
   initialize: (aOptions)->
+    defineProperty @, 'errors', []
     if aOptions
       if aOptions.encoding
         encoding = aOptions.encoding
@@ -29,6 +32,7 @@ module.exports = class Type
           @encoding = encoding
         else
           throw new TypeError "encoding should have name property, encode and decode functions."
+      @required = aOptions.required if aOptions.required?
       @assign(v, aOptions) if (v=aOptions.value)?
       @_initialize aOptions if @_initialize
     return
@@ -67,26 +71,44 @@ module.exports = class Type
     aString = @encoding.decode aString, aOptions if @encoding
     aString = @_decode aString, aOptions if @_decode
     checkValidity = aOptions.checkValidity or aOptions.raiseError if aOptions
-    if isUndefined(aString) and checkValidity isnt false
-      throw new TypeError('decode error:string "'+aString+ '" is not a valid '+@name)
+    if isUndefined(aString)
+      @error 'decode string to value error', aOptions
+      if checkValidity isnt false
+        throw new TypeError('decode error:string "'+aString+ '" is not a valid '+@name)
     aString
   decode: (aString, aOptions)->
     checkValidity = aOptions.checkValidity if aOptions
     aString = @decodeString aString, aOptions
     @validate(aString, checkValidity, aOptions) if checkValidity isnt false
     aString
-  mergeOptions: (aOptions)->
+  mergeOptions: (aOptions, aExclude)->
     aOptions = {} unless isObject aOptions
-    extend aOptions, @, (key)->not aOptions.hasOwnProperty key
+    if isString aExclude
+      aExclude = [aExclude]
+    else if not isArray aExclude
+      aExclude = []
+    extend aOptions, @, (key)->not (aOptions.hasOwnProperty(key) or (key in aExclude))
+    aOptions
   _validate: (aValue, aOptions)->true
+  error: (aMessage, aOptions)->
+    name = (aOptions && aOptions.name) || @name
+    @errors.push name: name, message: aMessage
+    return
+  validateRequired: (aValue, aOptions)->
+    result = not aOptions.required or (aOptions.required is true and aValue?)
+    if not result
+      @error 'is required'
+    result
   validate: (aValue, raiseError, aOptions)->
+    @errors = []
     if isObject raiseError
       aOptions    = raiseError
       raiseError  = aOptions.raiseError
     aOptions = @mergeOptions(aOptions)
     aOptions.raiseError = true if raiseError
     aValue = @decodeString aValue, aOptions if @isEncoded(aValue, aOptions)
-    result = @_validate(aValue, aOptions)
+    result = @validateRequired aValue, aOptions
+    result = @_validate(aValue, aOptions) if result and aValue?
     throw new TypeError(aValue + ' is not a valid ' + @name) if raiseError isnt false and not result
     result
   isValid: (aValue) ->
@@ -95,16 +117,17 @@ module.exports = class Type
   create: (aValue, aOptions)->
     aOptions = @mergeOptions(aOptions)
     aOptions.value = aValue if aValue?
+    aOptions.name = @name unless aOptions.name
     createObject @Class, aOptions
   createValue: @::create
-  clone: (aOptions)->
-    aOptions = @mergeOptions(aOptions)
-    createObject @Class, aOptions
+  clone: (aOptions)->@create(null, aOptions)
   createType: (aOptions)->
-    aOptions = @mergeOptions(aOptions)
-    delete aOptions.value
+    delete aOptions.value if aOptions
     createObject @Class, aOptions
-  cloneType: @::createType
+  cloneType: (aOptions)->
+    aOptions = @mergeOptions(aOptions)
+    aOptions.name = @name unless aOptions.name
+    @createType aOptions
   # Get aType class from the encoded string.
   from: (aString, aOptions)->
     aString = @encoding.decode aString, aOptions if @encoding
@@ -135,12 +158,13 @@ module.exports = class Type
     result.fullName = @path()
     result.encoding = @encoding.name if @encoding
     if aOptions
-      if not aOptions.typeOnly and @value
+      value = if aOptions.value? then aOptions.value else @value
+      if not aOptions.typeOnly and value?
         if aOptions.isEncoded
-          result.value = @encode(aOptions)
+          result.value = @encode(value, aOptions)
           result.isEncoded = true
         else
-          result.value = @value
+          result.value = value
     result
   valueOf: ->@value
 

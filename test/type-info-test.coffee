@@ -63,4 +63,13 @@ describe "TypeInfo", ->
       t.should.have.property 'min', 2
       (""+t).should.be.equal "5"
       (t + 3).should.be.equal 8
+  describe ".validate", ->
+    it "should validate required value", ->
+      validator = TypeInfo('Test').createType required: true
+      result = validator.validate null, false
+      result.should.be.equal false
+      validator.errors.should.be.deep.equal [{"message": "is required","name": "Test"}]
+    it "should validate required value and throw error", ->
+      validator = TypeInfo('Test').createType required: true
+      should.throw validator.validate.bind(validator, null), 'is not a valid'
 
