@@ -8,6 +8,7 @@ assert          = chai.assert
 chai.use(sinonChai)
 
 TypeInfo        = require '../src/type-info'
+Value           = require '../src/value'
 setImmediate    = setImmediate || process.nextTick
 register        = TypeInfo.register
 
@@ -27,9 +28,11 @@ describe "TypeInfo", ->
       t = TypeInfo('Test')
       t.pathArray().should.be.deep.equal ['type','Test']
     it "should get cutomize root type path array", ->
+      old = TypeInfo.ROOT_NAME
       TypeInfo.ROOT_NAME = 'atype'
       t = TypeInfo('Test')
       t.pathArray().should.be.deep.equal ['atype','Test']
+      TypeInfo.ROOT_NAME = old
 
   describe ".fromJson()", ->
     it "should get type info object from json", ->
@@ -57,10 +60,12 @@ describe "TypeInfo", ->
         value:5
       t = TypeInfo.createFromJson JSON.stringify obj
       should.exist t
-      t.should.be.instanceOf TestType
-      t.should.not.be.equal TypeInfo('Test')
-      t.should.have.property 'max', 6
-      t.should.have.property 'min', 2
+      t.should.be.instanceOf Value
+      vType = t.$type
+      vType.should.be.instanceOf TestType
+      vType.should.not.be.equal TypeInfo('Test')
+      vType.should.have.property 'max', 6
+      vType.should.have.property 'min', 2
       (""+t).should.be.equal "5"
       (t + 3).should.be.equal 8
   describe ".validate", ->
@@ -68,8 +73,8 @@ describe "TypeInfo", ->
       validator = TypeInfo('Test').createType required: true
       result = validator.validate null, false
       result.should.be.equal false
-      validator.errors.should.be.deep.equal [{"message": "is required","name": "Test"}]
+      validator.errors.should.be.deep.equal [{"message": "is required","name": "[type Test]"}]
     it "should validate required value and throw error", ->
       validator = TypeInfo('Test').createType required: true
-      should.throw validator.validate.bind(validator, null), 'is not a valid'
+      should.throw validator.validate.bind(validator, null), 'is a invalid'
 

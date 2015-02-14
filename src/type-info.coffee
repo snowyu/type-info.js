@@ -9,6 +9,7 @@ extend          = require("util-ex/lib/extend")
 defineProperty  = require("util-ex/lib/defineProperty")
 createObject    = require("inherits-ex/lib/createObject")
 try Codec       = require("buffer-codec")
+#Value           = require("./value")
 
 getProtoChain = (ctor)->
   result = while ctor and ctor isnt Type
@@ -16,14 +17,71 @@ getProtoChain = (ctor)->
     ctor = ctor.super_
     name
 
+objectToString = Object::toString
+
+getTypeName = (aValue)->
+  if aValue instanceof Object
+    result = objectToString.call aValue
+    i = result.lastIndexOf ' '
+    result = result.substring(i+1, result.length-1) if i >= 0
+  else
+    result = typeof aValue
+  result
+
+class Value
+  constructor: (aValue, aType, aOptions)->
+    if not (this instanceof Value)
+      if not (aType instanceof Type)
+        aOptions = aType
+        if aOptions
+          aType = Type.create getTypeName(aValue), aOptions
+        else
+          aType = Type getTypeName(aValue)
+      return createObject aType.ValueType, aValue, aType
+    defineProperty @, '$type', aType
+    @assign(aValue)
+  isValid: ()->@$type.isValid(@valueOf())
+  _assign:(aValue)->
+    @value = aValue
+    return
+  assign: (aValue, aOptions)->
+    checkValidity = aOptions.checkValidity if aOptions
+    if aOptions and aOptions.isEncoded
+      @_assign @$type.decode aValue, aOptions
+    else
+      @$type.validate(aValue, checkValidity) if checkValidity isnt false
+      @_assign aValue
+    return @
+  toString: ->String(@value)
+  valueOf: ->@value
+  toObject: (aOptions)->
+    aOptions = {} unless aOptions
+    aOptions.value = @valueOf()
+    result = @$type.toObject(aOptions)
+    result
+  toJson: (aOptions)->
+    result = @toObject(aOptions)
+    result = JSON.stringify result
+    result
+
 module.exports = class Type
   factory Type
 
   @ROOT_NAME: 'type'
+  @Value: Value
+  ValueType: Value
   constructor: (aTypeName, aOptions)->
     return super
   initialize: (aOptions)->
-    defineProperty @, 'errors', []
+    defineProperty @, 'errors', null
+    @_initialize aOptions if @_initialize
+    @assign(aOptions)
+  finalize: (aOptions)->
+    @errors = null if @errors
+    @encoding = null if @encoding
+    @_finalize(aOptions) if @_finalize
+  assign: (aOptions)->
+    @errors = []
     if aOptions
       if aOptions.encoding
         encoding = aOptions.encoding
@@ -33,22 +91,15 @@ module.exports = class Type
         else
           throw new TypeError "encoding should have name property, encode and decode functions."
       @required = aOptions.required if aOptions.required?
-      @assign(v, aOptions) if (v=aOptions.value)?
-      @_initialize aOptions if @_initialize
-    return
+      @parent   = aOptions.parent if aOptions.parent
+      @name = aOptions.name if aOptions.name
+    @_assign aOptions if @_assign
+    @
   _isEncoded:->false
   isEncoded: (aValue, aOptions)->
     result = aOptions.isEncoded if aOptions
     result = @_isEncoded(aValue, aOptions) unless result?
     result
-  assign: (aValue, aOptions)->
-    checkValidity = aOptions.checkValidity if aOptions
-    if aOptions and aOptions.isEncoded
-      @value = @decode aValue, aOptions
-    else
-      @validate(aValue, checkValidity, aOptions) if checkValidity isnt false
-      @value = aValue
-    return @
   path: ->
     @pathArray().join '/'
   pathArray: ->
@@ -74,7 +125,7 @@ module.exports = class Type
     if isUndefined(aString)
       @error 'decode string to value error', aOptions
       if checkValidity isnt false
-        throw new TypeError('decode error:string "'+aString+ '" is not a valid '+@name)
+        throw new TypeError('decode error:string "'+aString+ '" is a invalid '+@name)
     aString
   decode: (aString, aOptions)->
     checkValidity = aOptions.checkValidity if aOptions
@@ -91,7 +142,7 @@ module.exports = class Type
     aOptions
   _validate: (aValue, aOptions)->true
   error: (aMessage, aOptions)->
-    name = (aOptions && aOptions.name) || @name
+    name = (aOptions && aOptions.name) || String(@)
     @errors.push name: name, message: aMessage
     return
   validateRequired: (aValue, aOptions)->
@@ -109,17 +160,16 @@ module.exports = class Type
     aValue = @decodeString aValue, aOptions if @isEncoded(aValue, aOptions)
     result = @validateRequired aValue, aOptions
     result = @_validate(aValue, aOptions) if result and aValue?
-    throw new TypeError(aValue + ' is not a valid ' + @name) if raiseError isnt false and not result
+    throw new TypeError('"'+aValue + '" is a invalid ' + @name) if raiseError isnt false and not result
     result
   isValid: (aValue) ->
-    aValue = @value if isUndefined aValue
-    @_validate(aValue, @)
-  create: (aValue, aOptions)->
+    @validate(aValue, false)
+  createValue: (aValue, aOptions)->
     aOptions = @mergeOptions(aOptions)
-    aOptions.value = aValue if aValue?
-    aOptions.name = @name unless aOptions.name
-    createObject @Class, aOptions
-  createValue: @::create
+    #aOptions.name = @name unless aOptions.name
+    vType = createObject @Class, aOptions
+    Value aValue, vType
+  create: @::createValue
   clone: (aOptions)->@create(null, aOptions)
   createType: (aOptions)->
     delete aOptions.value if aOptions
@@ -129,11 +179,11 @@ module.exports = class Type
     aOptions.name = @name unless aOptions.name
     @createType aOptions
   # Get aType class from the encoded string.
-  from: (aString, aOptions)->
+  fromString: (aString, aOptions)->
     aString = @encoding.decode aString, aOptions if @encoding
     throw new TypeError("should decode string to object") if isString(aString) and not isObject(aString)
     Type aString
-  createfrom: (aString, aOptions)->
+  createfromString: (aString, aOptions)->
     aString = @encoding.decode aString, aOptions if @encoding
     throw new TypeError("should decode string to object") if isString(aString) and not isObject(aString)
     vType = aString.name
@@ -142,12 +192,18 @@ module.exports = class Type
   # Get a Type class from the json string.
   @fromJson: (aString)->
     aString = JSON.parse aString
-    Type aString
+    result = Type aString
+    if aString.value? and result
+      result.createValue aString.value, aString
+    result
   @createFromJson: (aString)->
     aString = JSON.parse aString
-    Type.create aString.name, aString
-      
-  toString: ->if @value then String(@value) else '[type '+ @name+']'
+    result = Type.create aString.name, aString
+    if aString.value? and result
+      result = result.createValue aString.value, aString
+    result
+
+  toString: ->if not @parent then '[type '+ @name+']' else '[attribute ' +@name+']'
   toJson: (aOptions)->
     result = @toObject(aOptions)
     result = JSON.stringify result
@@ -158,7 +214,7 @@ module.exports = class Type
     result.fullName = @path()
     result.encoding = @encoding.name if @encoding
     if aOptions
-      value = if aOptions.value? then aOptions.value else @value
+      value = aOptions.value if aOptions.value?
       if not aOptions.typeOnly and value?
         if aOptions.isEncoded
           result.value = @encode(value, aOptions)
@@ -166,5 +222,5 @@ module.exports = class Type
         else
           result.value = value
     result
-  valueOf: ->@value
+
 

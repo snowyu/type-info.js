@@ -5,6 +5,8 @@ isObject        = require 'util-ex/lib/is/type/object'
 isNumber        = require 'util-ex/lib/is/type/number'
 isString        = require 'util-ex/lib/is/type/string'
 defineProperty  = require 'util-ex/lib/defineProperty'
+inheritsObject  = require 'inherits-ex/lib/inheritsObject'
+ObjectValue     = require './value/object'
 module.exports  = Type = require './type-info'
 
 
@@ -16,6 +18,7 @@ class ObjectType
   aliases ObjectType, 'object'
 
   @defaultType: Type('string')
+  ValueType: ObjectValue
   defineAttribute: (aName, aOptions)->
     throw TypeError('defineAttribute has no attribute name') unless aName and aName.length
     throw TypeError('the attribute "' + aName + '" has already defined.') if @attributes[aName]?
@@ -29,9 +32,15 @@ class ObjectType
     else
       vType = ObjectType.defaultType
     aOptions = @mergeOptions(aOptions, ['attributes', 'name'])
+    aOptions.name = aName
+    aOptions.parent = vParent = @
     vType = vType.cloneType(aOptions)
-    vType.name = '[attribute ' + aName + ']'
-    vType.parent = @
+    vName = [aName]
+    while vParent && vParent.name isnt 'Object'
+      vName.push vParent.name
+      vParent = vParent.parent
+    vName.reverse()
+    vType.name = vName.join('.')
     @attributes[aName] = vType
   ###
     attributes = 
@@ -47,7 +56,9 @@ class ObjectType
   _initialize: (aOptions)->
     #defineProperty @, 'attributes', {}
     @attributes = {}
-    @defineAttributes(aOptions.attributes) if aOptions.attributes
+    return
+  _assign: (aOptions)->
+    @defineAttributes(aOptions.attributes) if aOptions and aOptions.attributes
     return
   _encode: (aValue, aOptions)->
     JSON.stringify(aValue)
@@ -64,7 +75,17 @@ class ObjectType
             if vType.errors.length
               @errors = @errors.concat vType.errors
             else
-              @errors.push name: vType.name, message: "is invalid"
+              @errors.push name: String(vType), message: "is invalid"
             result = false
     result
+  # can wrap a common object to an ObjectValue.
+  wrapValue:(aObjectValue)->
+    if isObject aObjectValue
+      if not (aObjectValue instanceof ObjectValue)
+        inheritsObject aObjectValue, ObjectValue
+      if aObjectValue.hasOwnProperty '$type'
+        @$type = @
+      else
+        defineProperty aObjectValue, '$type', @
+    aObjectValue
 

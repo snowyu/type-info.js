@@ -6,9 +6,11 @@ expect          = chai.expect
 assert          = chai.assert
 chai.use(sinonChai)
 
+extend          = require 'util-ex/lib/_extend'
 require '../src/number'
 require '../src/string'
 Type            = require '../src/object'
+ObjectValue     = require '../src/value/object'
 setImmediate    = setImmediate || process.nextTick
 
 describe "ObjectType", ->
@@ -21,20 +23,27 @@ describe "ObjectType", ->
     it "should encode value", ->
       object.encode({}).should.be.equal "{}"
     it "should throw error when encode invalid value", ->
-      should.throw object.encode.bind(object, 'as'), "is not a valid"
+      should.throw object.encode.bind(object, 'as'), "is a invalid"
   describe ".decode()", ->
     it "should decode value", ->
       object.decode("{}").should.be.deep.equal {}
     it "should throw error when decode invalid string object", ->
-      should.throw object.decode.bind(object, 'as'), "is not a valid"
+      should.throw object.decode.bind(object, 'as'), "is a invalid"
   describe ".toObject()", ->
     it "should get type info to obj", ->
       result = object.toObject typeOnly: true
-      result.should.be.deep.equal "name":"Object","fullName":"type/Object"
+      result.should.be.deep.equal "attributes": {},"name":"Object","fullName":"type/Object"
     it "should get value info to obj", ->
       result = object.create({a:1})
       result = result.toObject()
-      result.should.be.deep.equal "attributes": {}, "name":"Object","fullName":"type/Object", value: {a:1}
+      #result = extend {}, result #TODO why deep equal is not same?
+      result = JSON.parse JSON.stringify result
+      expected = 
+        attributes: {}
+        name: 'Object'
+        fullName: 'type/Object'
+        value: { a: 1 }
+      result.should.be.deep.equal expected
   describe ".toString()", ->
     it "should get type name if no value", ->
       result = String(object)
@@ -42,29 +51,34 @@ describe "ObjectType", ->
     it "should get value string if value", ->
       result = object.create({a:13})
       result = String(result)
-      result.should.be.equal '[object Object]'
+      result.should.be.equal '[type Object]'
   describe ".toJson()", ->
     it "should get type info via json string", ->
       result = object.toJson typeOnly: true
       result = JSON.parse result
-      result.should.be.deep.equal "name":"Object","fullName":"type/Object"
+      result.should.be.deep.equal "attributes": {}, "name":"Object","fullName":"type/Object"
     it "should get value info to obj", ->
       result = object.create a:13
       result = result.toJson()
       result = JSON.parse result
       result.should.be.deep.equal "attributes": {},"name":"Object","fullName":"type/Object", value: {a:13}
-  describe ".createValue()/.create()", ->
-    #TODO
+  describe ".createValue()", ->
     it "should create a value", ->
       n = object.create({a:12})
-      assert.deepEqual n.valueOf(), a:12
-    it "should not create a value (exceed limits)", ->
+      n.should.have.property 'a', 12
+      n.should.be.instanceOf ObjectValue
+    it "should not create a value (invalid object)", ->
       assert.throw object.create.bind(object, 1234)
   describe ".assign()", ->
-    #TODO
     it "should assign a value", ->
-      n = object.create({})
-      assert.deepEqual n.assign({a:13}).valueOf(), {a:13}
+      n = object.createValue({})
+      n.assign({a:13})
+      n.should.have.property 'a', 13
+  describe ".wrapValue()", ->
+    it "should wrap an object value", ->
+      n = object.wrapValue({a:24})
+      n.should.have.property 'a', 24
+      n.should.be.instanceOf ObjectValue
 
   describe ".validate()", ->
     t = object.cloneType attributes:
@@ -98,10 +112,10 @@ describe "ObjectType", ->
     it "should validate a object attribute value and do not raise error", ->
       t.validate({c:"hi", d:{d2:""}}).should.be.equal true
       t.validate({c:"hi", d:{d1:1}}, false).should.be.equal false
-      t.errors.should.be.deep.equal ["name": "[attribute d2]", "message": "is required"]
+      t.errors.should.be.deep.equal ["name": "[attribute d.d2]", "message": "is required"]
     it "should validate a value and raise error", ->
-      should.throw t.validate.bind(t, 0), 'is not a valid'
-      should.throw t.validate.bind(t, 11), 'is not a valid'
+      should.throw t.validate.bind(t, 0), 'is a invalid'
+      should.throw t.validate.bind(t, 11), 'is a invalid'
     it "should validate an encoded value", ->
       t.validate('{"c":""}').should.be.equal true
 

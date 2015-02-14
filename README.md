@@ -1,8 +1,8 @@
 ## type-info [![npm](https://img.shields.io/npm/v/type-info.svg)](https://npmjs.org/package/type-info)
 
-[![Build Status](https://img.shields.io/travis/snowyu/type-info.js/master.svg)](http://travis-ci.org/snowyu/type-info.js) 
-[![downloads](https://img.shields.io/npm/dm/type-info.svg)](https://npmjs.org/package/type-info) 
-[![license](https://img.shields.io/npm/l/type-info.svg)](https://npmjs.org/package/type-info) 
+[![Build Status](https://img.shields.io/travis/snowyu/type-info.js/master.svg)](http://travis-ci.org/snowyu/type-info.js)
+[![downloads](https://img.shields.io/npm/dm/type-info.svg)](https://npmjs.org/package/type-info)
+[![license](https://img.shields.io/npm/l/type-info.svg)](https://npmjs.org/package/type-info)
 
 The mini Run-time Type Infomation.
 
@@ -21,13 +21,10 @@ all typed value could be encode to a string. The encoded string could be decode 
 
 ## todo
 
-* separate the value from type
-  * value.$type -> point to a virtual type.
-* object value does not work yet.
 * Cache the Virtual Types
   * search via name:
     * named the virtual type first
-    * hashed to make name the virtual type if no name given 
+    * hashed to make name the virtual type if no name given
 
 
 ## Usage
@@ -36,11 +33,13 @@ all typed value could be encode to a string. The encoded string could be decode 
 
 These methods should be overrided:
 
+* `_initialize(aOptions)`: initialize the options to the type object.
+* `_assign(options)`: assign an options of type to itself.
 * `_encode(aValue, aOptions)`: convert a value to string.
 * `_decode(aString, aOptions)`: convert a string to a value. return undefined if decode failed.
-* `_initialize(aOptions)`: initialize the options to the type object.
 * `_validate(aValue, aOptions)`: validate a value whether is valid.
 * `_isEncoded(aValue)`: check the value whether is encoded.
+* `ValueType` property: defaults to `Value` Class unless override it.
 
 ```coffee
 
@@ -62,65 +61,82 @@ class NumberType
   _initialize: (aOptions)->
     if aOptions
       extend @, aOptions, (k,v)->k in ['min', 'max'] and isNumber v
+      throw TypeError('max should be equal or greater than min') if @min? and @max? and @max < @min
     return
   _encode: (aValue, aOptions)->
     aValue = String(aValue)
   _decode: (aString, aOptions)->
-    if isFloat aString
+    if isInt aString
+      aString = parseInt(aString)
+    else if isFloat aString
       aString = parseFloat(aString)
     else
       aString = undefined
     aString
-  _isEncoded: (aValue) -> isString aValue
+  _isEncoded: (aValue)->isString(aValue)
   _validate: (aValue, aOptions)->
     result = isNumber aValue
     if result
       if aOptions
         vMin = aOptions.min
         vMax = aOptions.max
-        result = aValue >= vMin if vMin?
-        result = aValue <= vMax if result and vMax?
+        if vMin?
+          result = aValue >= vMin
+          if not result
+            @error "should be equal or greater than minimum value: " + vMin
+        if result and vMax?
+          result = aValue <= vMax
+          if not result
+            @error "should be equal or less than maximum value: " + vMax
     result
-
 ```
 ### User
 
 ```coffee
-Type = require 'type-info'
+Type  = require 'type-info'
+Value = Type.Value
 
 # get number type info object(Virtual Type):
-# you can treat it as a gobal temporary type object.
-numberType = Type 'Number', min:1, max:6
+# you can treat it as a global temporary type object.
+number = Type 'Number', min:1, max:6
 
-assert.equal numberType, Type('Number')
+assert.equal number, Type('Number')
 
 # get Number Type Class(Primitive Type):
-
 NumberType = Type.registeredClass 'Number'
 
 # create a number value:
-
-n = numberType.create(2)
-# or n = numberType.createValue(2)
+n = Value(2)
+# n = Value(2, number)
+# n = number.create(2)
+# n = number.createValue(2)
 
 assert.ok    n.isValid()
 assert.equal n+2, 4
-assert.throw numberType.validate.bind(numberType, 13)
+assert.throw number.validate.bind(number, 13)
 
-n.assign 5
+n.assign 5 # n = 5
 assert.equal n+2, 7
 
-# re-initialize the numberType:
-numberType.initialize min:3, max:10
-# or numberType.min = 3, numberType.max = 10
+# assign a new type options to the number type:
+number.assign min:3, max:10
+# or number.min = 3, number.max = 10
 
 ```
 
 ## API
 
+
+### Type = require('type-info')
+
+#### constructor(typeName, options)
+
+get a global type instance object.
+
+#### Type.create(typeName, options)
+
+create a new Type instance object.
+
 ## License
 
 MIT
-
-
-

@@ -11,9 +11,14 @@ class StringType
   register StringType
   aliases StringType, 'string', 'str'
 
-  _initialize: (aOptions)->
+  _assign: (aOptions)->
     if aOptions
-      extend @, aOptions, (k,v)->k in ['min', 'max'] and isNumber v
+      extend @, aOptions, (k,v)=>
+        result = k in ['min', 'max'] 
+        if result
+          result = isNumber v
+          delete @[k] unless result
+        result
       throw new TypeError('max should be equal or greater than min') if @min? and @max? and @max < @min
     return
   _validate: (aValue, aOptions)->

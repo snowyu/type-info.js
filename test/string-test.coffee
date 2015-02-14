@@ -19,18 +19,18 @@ describe "StringType", ->
     it "should encode value", ->
       string.encode('asv').should.be.equal "asv"
     it "should throw error when value not string type", ->
-      should.throw string.encode.bind(string, 1), "is not a valid"
+      should.throw string.encode.bind(string, 1), "is a invalid"
     it "should throw error when string length < min", ->
       string.initialize min: 2
-      should.throw string.encode.bind(string, '1'), "is not a valid"
+      should.throw string.encode.bind(string, '1'), "is a invalid"
     it "should throw error when string length > max", ->
       string.initialize max: 3
-      should.throw string.encode.bind(string, 'sd123'), "is not a valid"
+      should.throw string.encode.bind(string, 'sd123'), "is a invalid"
   describe ".decode()", ->
     it "should decode value", ->
       string.decode("25").should.be.equal "25"
     it "should throw error when decode invalid string(exceed length limits)", ->
-      should.throw string.decode.bind(string, 'asddf'), "is not a valid"
+      should.throw string.decode.bind(string, 'asddf'), "is a invalid"
   describe ".toObject()", ->
     it "should get type info to obj", ->
       result = string.toObject typeOnly: true
@@ -54,6 +54,7 @@ describe "StringType", ->
       s = string.create("123")
       assert.equal String(s), "123"
     it "should not create a value (exceed length limits)", ->
+      string.initialize max:3, min:2
       assert.throw string.create.bind(string, "1234")
   describe ".assign()", ->
     it "should assign a value", ->
