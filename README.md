@@ -134,13 +134,243 @@ number.assign min:3, max:10
 
 ### Type = require('type-info')
 
+the type info class.
+
 #### constructor(typeName, options)
 
 get a global type instance object.
 
+__arguments__
+
+* `typeName` *(string)*: the type name.
+* `options` *(object)*: optional type options to apply. different types have different options.
+
+__return__
+
+* *(object)*: the type object instance from global cache.
+
 #### Type.create(typeName, options)
 
-create a new Type instance object.
+This class method is used to create a new Type instance object.
+
+__arguments__
+
+* `typeName` *(string)*: the type name.
+* `options` *(object)*: optional type options. different types have different options.
+
+__return__
+
+* *(object)*: the created type object instance.
+
+#### cloneType()
+
+clone the type object.
+
+* alias: clone
+
+__return__
+
+* *(object)*: the created type object instance with same type info.
+
+#### createType(options)
+
+create a new the type object of this type with the type options.
+
+__arguments__
+
+* `options` *(object)*: optional type options. different types have different options.
+  * it is the same as `cloneType()` if no options
+
+__return__
+
+* *(object)*: the created type object instance with the type info options.
+
+#### createFromJson(json)
+
+create a new the type object of this type from a json string.
+
+__arguments__
+
+* `json` *(string)*: the json string with type info.
+
+__return__
+
+* *(object)*:
+  * the created type object instance with the type info if no value in it.
+  * the created value object instance if value in it.
+
+#### createValue(value, options)
+
+* alias: create
+
+create a value from the type.
+
+__arguments__
+
+* `value` *(Type)*: the value of this type to create
+* `options` *(object)*: optional type options
+  * the new virtual type of the value will be created if exists
+
+__return__
+
+* *(object)*: the created value object instance.
+
+#### toObject(options)
+
+convert the type info to an object. It could be streamable your type.
+
+__arguments__
+
+* `options` *(object)*: optional options
+  * `value` *(Type)*: optional value, when value exists, the following options used:
+    * `isEncoded` *(boolean)*:  whether encode the value. defaults to false
+    * `typeOnly` *(boolean)*: just type info if true. defaults to false.
+
+__return__
+
+* *(object)*: the created object with type info.
+
+#### toJson(options)
+
+convert the type info to a json string. It could be streamable your type.
+
+__arguments__
+
+* `options` *(object)*: optional options
+  * `value` *(Type)*: optional value, when value exists, the following options used:
+    * `isEncoded` *(boolean)*:  whether encode the value. defaults to false
+    * `typeOnly` *(boolean)*: just type info if true. defaults to false.
+
+__return__
+
+* *(string)*: the json string with type info.
+
+#### validate(value, raiseError, options)
+
+validate a specified value whether is valid.
+
+__arguments__
+
+* `value` *(Type)*: the value to validate
+* `raiseError` *(boolean)*:  whether throw error if validate failed. defaults to true.
+* `options` *(object)*: optional type options to override. defaults to this type options.
+
+__return__
+
+* *(boolean)*: whether is valid if no raise error.
+
+
+### Value = require('type-info').Value
+
+the value class.
+
+#### constructor(value[[, type], options])
+
+__arguments__
+
+* `value` *(Type)*: the value to be created.
+  * it will guess the type if no type object.
+* `type` *(Object)*: the optional type object.
+* `options` *(object)*: optional type options.
+  * checkValidity *(boolean)*: whether check the value is valid. defaults to true.
+
+__return__
+
+* *(object)*: the created value object instance.
+
+#### property $type
+
+point to a type object. It can not be enumerable.
+
+#### clone()
+
+clone the value object.
+
+__return__
+
+* *(object)*: the created new value object instance with same as original info.
+
+#### create(value, options)
+
+create a new the value object.
+
+__arguments__
+
+* `value` *(Type)*: the value to be created. MUST BE the same type.
+* `options` *(object)*: optional type options.
+  * checkValidity *(boolean)*: whether check the value is valid. defaults to true.
+
+__return__
+
+* *(object)*: the created value object instance.
+
+#### assign(value, options)
+
+assign a value to itself.
+
+__arguments__
+
+* `value` *(Type)*: the value to be assigned. MUST BE the same type.
+* `options` *(object)*: optional type options.
+  * checkValidity *(boolean)*: whether check the value is valid. defaults to true.
+  * isEncoded *(boolean)*: whether the value is encoded. defaults to false.
+
+__return__
+
+* *(object)*: `this` object.
+
+#### isValid()
+
+validate the value whether is valid.
+
+__return__
+
+* *(boolean)*: whether the value is valid.
+
+#### toObject(options)
+
+convert the value to an object. include type info. It could be streamable your value.
+
+__arguments__
+
+* `options` *(object)*: optional options
+  * `isEncoded` *(boolean)*:  whether encode the value. defaults to false
+  * `typeOnly` *(boolean)*: just type info if true. defaults to false.
+
+__return__
+
+* *(object)*: the created object with value and type info.
+
+```coffee
+Type  = require 'type-info'
+Value = Type.Value
+
+val = Value(3, min: 1, max: 3)
+
+console.log val.toObject()
+{
+  min:1
+  max:3
+  name: 'Number'
+  fullName: 'type/Number'
+  value:3
+}
+
+```
+
+#### toJson(options)
+
+convert the value to a json string. include type info. It could be streamable your value.
+
+__arguments__
+
+* `options` *(object)*: optional options
+  * `isEncoded` *(boolean)*:  whether encode the value. defaults to false
+  * `typeOnly` *(boolean)*: just type info if true. defaults to false.
+
+__return__
+
+* *(string)*: the json string with type info and value.
 
 ## License
 
