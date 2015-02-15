@@ -52,6 +52,9 @@ class Value
       @$type.validate(aValue, checkValidity) if checkValidity isnt false
       @_assign aValue
     return @
+  create: (aValue, aOptions)->
+    @$type.createValue aValue, aOptions
+  clone: @::create
   toString: ->String(@value)
   valueOf: ->@value
   toObject: (aOptions)->
@@ -165,12 +168,13 @@ module.exports = class Type
   isValid: (aValue) ->
     @validate(aValue, false)
   createValue: (aValue, aOptions)->
-    aOptions = @mergeOptions(aOptions)
-    #aOptions.name = @name unless aOptions.name
-    vType = createObject @Class, aOptions
+    if aOptions
+      aOptions = @mergeOptions(aOptions)
+      vType = createObject @Class, aOptions
+    else
+      vType = @
     Value aValue, vType
   create: @::createValue
-  clone: (aOptions)->@create(null, aOptions)
   createType: (aOptions)->
     delete aOptions.value if aOptions
     createObject @Class, aOptions
@@ -178,6 +182,7 @@ module.exports = class Type
     aOptions = @mergeOptions(aOptions)
     aOptions.name = @name unless aOptions.name
     @createType aOptions
+  clone: @::cloneType
   # Get aType class from the encoded string.
   fromString: (aString, aOptions)->
     aString = @encoding.decode aString, aOptions if @encoding
@@ -222,5 +227,3 @@ module.exports = class Type
         else
           result.value = value
     result
-
-
