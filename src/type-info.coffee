@@ -11,12 +11,6 @@ createObject    = require("inherits-ex/lib/createObject")
 try Codec       = require("buffer-codec")
 #Value           = require("./value")
 
-getProtoChain = (ctor)->
-  result = while ctor and ctor isnt Type
-    name = ctor::name
-    ctor = ctor.super_
-    name
-
 objectToString = Object::toString
 
 getTypeName = (aValue)->
@@ -89,10 +83,13 @@ module.exports = class Type
       if aOptions.encoding
         encoding = aOptions.encoding
         encoding = Codec encoding if Codec and isString encoding
-        if isFunction(encoding.encode) and isFunction(encoding.decode) and encoding.name
+        if isFunction(encoding.encode) and
+           isFunction(encoding.decode) and encoding.name
           @encoding = encoding
         else
-          throw new TypeError "encoding should have name property, encode and decode functions."
+          throw new TypeError "
+            encoding should have name property, encode and decode functions.
+          "
       @required = aOptions.required if aOptions.required?
       @parent   = aOptions.parent if aOptions.parent
       @name = aOptions.name if aOptions.name
@@ -103,12 +100,8 @@ module.exports = class Type
     result = aOptions.isEncoded if aOptions
     result = @_isEncoded(aValue, aOptions) unless result?
     result
-  path: ->
-    @pathArray().join '/'
-  pathArray: ->
-    result = getProtoChain(@Class)
-    result.push Type.ROOT_NAME
-    result.reverse()
+  pathArray: (aRootName = Type.ROOT_NAME)->
+    return super(aRootName)
   encodeValue: (aValue, aOptions)->
     aValue = @encoding.encode aValue, aOptions if @encoding
     aValue = @_encode aValue, aOptions if @_encode
@@ -163,7 +156,8 @@ module.exports = class Type
     aValue = @decodeString aValue, aOptions if @isEncoded(aValue, aOptions)
     result = @validateRequired aValue, aOptions
     result = @_validate(aValue, aOptions) if result and aValue?
-    throw new TypeError('"'+aValue + '" is a invalid ' + @name) if raiseError isnt false and not result
+    if raiseError isnt false and not result
+      throw new TypeError('"'+aValue + '" is a invalid ' + @name)
     result
   isValid: (aValue) ->
     @validate(aValue, false)

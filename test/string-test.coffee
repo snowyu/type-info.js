@@ -34,21 +34,39 @@ describe "StringType", ->
   describe ".toObject()", ->
     it "should get type info to obj", ->
       result = string.toObject typeOnly: true
-      result.should.be.deep.equal max:3,min:2,name:"String",fullName:"type/String"
+      result.should.be.deep.equal
+        max:3
+        min:2
+        name:"String"
+        fullName:"/type/String"
     it "should get value info to obj", ->
       result = string.create("asd")
-      result = result.toObject() 
-      result.should.be.deep.equal max:3,min:2,name:"String",fullName:"type/String", value:"asd"
+      result = result.toObject()
+      result.should.be.deep.equal
+        max:3
+        min:2
+        name:"String"
+        fullName:"/type/String"
+        value:"asd"
   describe ".toJson()", ->
     it "should get type info via json string", ->
       result = string.toJson typeOnly: true
       result = JSON.parse result
-      result.should.be.deep.equal max:3,min:2,name:"String",fullName:"type/String"
+      result.should.be.deep.equal
+        max:3
+        min:2
+        name:"String"
+        fullName:"/type/String"
     it "should get value info via json string", ->
       result = string.create("asd")
-      result = result.toJson() 
+      result = result.toJson()
       result = JSON.parse result
-      result.should.be.deep.equal max:3,min:2,name:"String",fullName:"type/String", value:"asd"
+      result.should.be.deep.equal
+        max:3
+        min:2
+        name:"String"
+        fullName:"/type/String"
+        value:"asd"
   describe ".createValue()/.create()", ->
     it "should create a value", ->
       s = string.create("123")
@@ -60,5 +78,3 @@ describe "StringType", ->
     it "should assign a value", ->
       n = string.create('12')
       assert.equal String(n.assign('bb')), 'bb'
-
-

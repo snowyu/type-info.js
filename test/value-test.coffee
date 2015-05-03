@@ -76,21 +76,20 @@ describe 'Value', ->
     it 'should convert value to object', ->
       val = Value('1234567890', max:10, min:1)
       result = val.toObject()
-      result.should.be.deep.equal 
+      result.should.be.deep.equal
         max: 10
         min: 1
         name: 'String'
-        fullName: 'type/String'
+        fullName: '/type/String'
         value: '1234567890'
   describe '.toJson', ->
     it 'should convert value to json object', ->
       val = Value('1234567890', max:10, min:1)
       result = val.toJson()
       result = JSON.parse result
-      result.should.be.deep.equal 
+      result.should.be.deep.equal
         max: 10
         min: 1
         name: 'String'
-        fullName: 'type/String'
+        fullName: '/type/String'
         value: '1234567890'
-

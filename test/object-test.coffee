@@ -32,16 +32,19 @@ describe "ObjectType", ->
   describe ".toObject()", ->
     it "should get type info to obj", ->
       result = object.toObject typeOnly: true
-      result.should.be.deep.equal "attributes": {},"name":"Object","fullName":"type/Object"
+      result.should.be.deep.equal
+        "attributes": {}
+        "name":"Object"
+        "fullName":"/type/Object"
     it "should get value info to obj", ->
       result = object.create({a:1})
       result = result.toObject()
       #result = extend {}, result #TODO why deep equal is not same?
       result = JSON.parse JSON.stringify result
-      expected = 
+      expected =
         attributes: {}
         name: 'Object'
-        fullName: 'type/Object'
+        fullName: '/type/Object'
         value: { a: 1 }
       result.should.be.deep.equal expected
   describe ".toString()", ->
@@ -56,12 +59,19 @@ describe "ObjectType", ->
     it "should get type info via json string", ->
       result = object.toJson typeOnly: true
       result = JSON.parse result
-      result.should.be.deep.equal "attributes": {}, "name":"Object","fullName":"type/Object"
+      result.should.be.deep.equal
+        "attributes": {}
+        "name":"Object"
+        "fullName":"/type/Object"
     it "should get value info to obj", ->
       result = object.create a:13
       result = result.toJson()
       result = JSON.parse result
-      result.should.be.deep.equal "attributes": {},"name":"Object","fullName":"type/Object", value: {a:13}
+      result.should.be.deep.equal
+        "attributes": {}
+        "name":"Object"
+        "fullName":"/type/Object"
+        value: {a:13}
   describe ".createValue()", ->
     it "should create a value", ->
       n = object.create({a:12})
@@ -118,4 +128,3 @@ describe "ObjectType", ->
       should.throw t.validate.bind(t, 11), 'is a invalid'
     it "should validate an encoded value", ->
       t.validate('{"c":""}').should.be.equal true
-

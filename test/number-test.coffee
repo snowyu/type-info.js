@@ -23,7 +23,7 @@ describe "NumberType", ->
     it "should throw error when encode invalid value", ->
       should.throw number.encode.bind(number, 'as'), "is a invalid"
     it "should throw error when value < min", ->
-      number.initialize min: 5 
+      number.initialize min: 5
       should.throw number.encode.bind(number, '1'), "is a invalid"
     it "should throw error when value > max", ->
       number.initialize max: 34
@@ -36,11 +36,20 @@ describe "NumberType", ->
   describe ".toObject()", ->
     it "should get type info to obj", ->
       result = number.toObject typeOnly: true
-      result.should.be.deep.equal "max":34,"min":5,"name":"Number","fullName":"type/Number"
+      result.should.be.deep.equal
+        "max":34
+        "min":5
+        "name":"Number"
+        "fullName":"/type/Number"
     it "should get value info to obj", ->
       result = number.create(13)
       result = result.toObject()
-      result.should.be.deep.equal "max":34,"min":5,"name":"Number","fullName":"type/Number", value: 13
+      result.should.be.deep.equal
+        "max":34
+        "min":5
+        "name":"Number"
+        "fullName":"/type/Number"
+        value: 13
   describe ".toString()", ->
     it "should get type name if no value", ->
       result = String(number)
@@ -53,12 +62,21 @@ describe "NumberType", ->
     it "should get type info via json string", ->
       result = number.toJson typeOnly: true
       result = JSON.parse result
-      result.should.be.deep.equal "max":34,"min":5,"name":"Number","fullName":"type/Number"
+      result.should.be.deep.equal
+        "max":34
+        "min":5
+        "name":"Number"
+        "fullName":"/type/Number"
     it "should get value info to obj", ->
       result = number.create(13)
       result = result.toJson()
       result = JSON.parse result
-      result.should.be.deep.equal "max":34,"min":5,"name":"Number","fullName":"type/Number", value: 13
+      result.should.be.deep.equal
+        "max":34
+        "min":5
+        "name":"Number"
+        "fullName":"/type/Number"
+        value: 13
   describe ".createValue()/.create()", ->
     it "should create a value", ->
       n = number.create(12)
@@ -81,4 +99,3 @@ describe "NumberType", ->
       should.throw t.validate.bind(t, 11), 'is a invalid'
     it "should validate an encoded value", ->
       t.validate("5").should.be.equal true
-

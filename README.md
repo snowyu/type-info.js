@@ -97,6 +97,13 @@ class NumberType
 ```
 ### User
 
+* Type(aTypeName, aOptions)
+  * get the type info object from glabal cache.
+* Type.createType(aObject)
+  * create a new type info object instance.
+  * the aObject.name should be exists as the type name.
+
+
 ```coffee
 Type  = require 'type-info'
 Value = Type.Value
@@ -138,7 +145,7 @@ the type info class.
 
 #### constructor(typeName, options)
 
-get a global type instance object.
+get a global type info instance object.
 
 __arguments__
 
