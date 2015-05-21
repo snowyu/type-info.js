@@ -19,12 +19,25 @@ all typed value could be encode to a string. The encoded string could be decode 
   * It could be unlimited number of virtual types.
 
 
-## todo
-
 * Cache the Virtual Types
-  * search via name:
-    * named the virtual type first
-    * hashed to make name the virtual type if no name given
+
+Install cache-factory first.
+
+  npm install cache-factory
+
+
+```coffee
+Type = require 'type-info'
+cacheable = require 'cache-factory'
+
+# apply the cache-able ability to Type
+cacheable Type
+
+# now cache the virtual types.
+passwordType = Type 'String', min:6, cached: {name: 'Password'}
+
+```
+
 
 
 ## Usage
