@@ -33,11 +33,16 @@ cacheable = require 'cache-factory'
 # apply the cache-able ability to Type
 cacheable Type
 
-# now cache the virtual types.
+# now cache the virtual types with name.
 passwordType = Type 'String', min:6, cached: {name: 'Password'}
+# or no named it: 
+passwordType = Type 'String', min:6, cached: true
 
+p2 = Type 'String', min:6, cached: true
+assert p2 is passwordType
 ```
 
+more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 
 
 ## Usage
