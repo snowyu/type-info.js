@@ -4,6 +4,7 @@ isFunction      = require("util-ex/lib/is/type/function")
 isString        = require("util-ex/lib/is/type/string")
 isArray         = require("util-ex/lib/is/type/array")
 isUndefined     = require("util-ex/lib/is/type/undefined")
+inject          = require("util-ex/lib/inject")
 #isBoolean     = require("util-ex/lib/is/type/boolean")
 extend          = require("util-ex/lib/extend")
 defineProperty  = require("util-ex/lib/defineProperty")
@@ -67,6 +68,12 @@ module.exports = class Type
   @ROOT_NAME: 'type'
   @Value: Value
   ValueType: Value
+
+  # inject the pathArray func to modify the aRootName
+  @pathArray: inject @pathArray, (aClass, aRootName = Type.ROOT_NAME) ->
+    # pass the modified arguments to old pathArray func:
+    return arguments
+
   constructor: (aTypeName, aOptions)->
     return super
   initialize: (aOptions)->
@@ -100,8 +107,6 @@ module.exports = class Type
     result = aOptions.isEncoded if aOptions
     result = @_isEncoded(aValue, aOptions) unless result?
     result
-  pathArray: (aRootName = Type.ROOT_NAME)->
-    return super(aRootName)
   encodeValue: (aValue, aOptions)->
     aValue = @encoding.encode aValue, aOptions if @encoding
     aValue = @_encode aValue, aOptions if @_encode
