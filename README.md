@@ -19,7 +19,7 @@ all typed value could be encode to a string. The encoded string could be decode 
   * It could be unlimited number of virtual types.
 
 
-* Cache the Virtual Types
+## Cache the Virtual Types
 
 Install cache-factory first.
 
@@ -35,15 +35,21 @@ cacheable Type
 
 # now cache the virtual types with name.
 passwordType = Type 'String', min:6, cached: {name: 'Password'}
-# or no named it: 
-passwordType = Type 'String', min:6, cached: true
+# or no named it:
+passwordType1 = Type 'String', min:6, cached: true
 
 p2 = Type 'String', min:6, cached: true
-assert p2 is passwordType
+p3 = Type 'String', min:6, cached: {name: 'Password'}
+assert p2 is passwordType1
+assert p3 is passwordType
+assert passwordType isnt passwordType1
 ```
 
 more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 
+## TODO
+
+* ObjectType should use ValueType.toObject to transform value.
 
 ## Usage
 
@@ -169,6 +175,14 @@ __arguments__
 
 * `typeName` *(string)*: the type name.
 * `options` *(object)*: optional type options to apply. different types have different options.
+  * `parent` *(TypeInfo)*: it should be an attribute if the `parent` exists
+  * `required` *(boolean)*: this type is required.
+  * `encoding` *(string or object)*:
+    * 'string': the encoding name. it should install the [buffer-codec](https://github.com/snwyu/node-buffer-codec)
+    * 'object':
+      * `name` *(string)*: the encoding name.
+      * `encode` *(function)*: the encode function.
+      * `decode` *(function)*: the decode function.
 
 __return__
 
