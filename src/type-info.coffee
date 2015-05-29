@@ -52,9 +52,11 @@ class Value
   clone: @::create
   toString: ->String(@value)
   valueOf: ->@value
+  # the simple object used to transform to json.
+  _toObject: -> @valueOf()
   toObject: (aOptions)->
     aOptions = {} unless aOptions
-    aOptions.value = @valueOf()
+    aOptions.value = @_toObject()
     result = @$type.toObject(aOptions)
     result
   toJson: (aOptions)->
@@ -185,21 +187,24 @@ module.exports = class Type
   # Get aType class from the encoded string.
   fromString: (aString, aOptions)->
     aString = @encoding.decode aString, aOptions if @encoding
-    throw new TypeError("should decode string to object") if isString(aString) and not isObject(aString)
+    if isString(aString) and not isObject(aString)
+      throw new TypeError("should decode string to object")
     Type aString
   createfromString: (aString, aOptions)->
     aString = @encoding.decode aString, aOptions if @encoding
-    throw new TypeError("should decode string to object") if isString(aString) and not isObject(aString)
+    if isString(aString) and not isObject(aString)
+      throw new TypeError("should decode string to object")
     vType = aString.name
     vType = Type.registeredClass vType
     if vType then createObject vType, aString
-  # Get a Type class from the json string.
+  # Get a global Type class or create new Value from the json string.
   @fromJson: (aString)->
     aString = JSON.parse aString
     result = Type aString
     if aString.value? and result
-      result.createValue aString.value, aString
+      result = result.createValue aString.value, aString
     result
+  # create a new Type instance  or create new Value from json string.
   @createFromJson: (aString)->
     aString = JSON.parse aString
     result = Type.create aString.name, aString
@@ -207,7 +212,8 @@ module.exports = class Type
       result = result.createValue aString.value, aString
     result
 
-  toString: ->if not @parent then '[type '+ @name+']' else '[attribute ' +@name+']'
+  toString: ->
+    if not @parent then '[type '+ @name+']' else '[attribute ' +@name+']'
   toJson: (aOptions)->
     result = @toObject(aOptions)
     result = JSON.stringify result
@@ -220,6 +226,7 @@ module.exports = class Type
     if aOptions
       value = aOptions.value if aOptions.value?
       if not aOptions.typeOnly and value?
+        value = value._toObject() if value instanceof Value
         if aOptions.isEncoded
           result.value = @encode(value, aOptions)
           result.isEncoded = true

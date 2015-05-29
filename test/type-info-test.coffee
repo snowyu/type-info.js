@@ -41,6 +41,17 @@ describe "TypeInfo", ->
       t.should.be.equal TypeInfo('Test')
       t.should.have.property 'max', 3
       t.should.have.property 'min', 2
+    it "should create Value object from json", ->
+      t = TypeInfo.fromJson('{"name":"Test","min":2, "max":3, "value":3}')
+      should.exist t
+      t.should.be.instanceOf Value
+      vType = t.$type
+      vType.should.be.instanceOf TestType
+      vType.should.not.be.equal TypeInfo('Test')
+      vType.should.have.property 'max', 3
+      vType.should.have.property 'min', 2
+      (""+t).should.be.equal "3"
+      (t + 3).should.be.equal 6
   describe ".createFromJson()", ->
     it "should create a new type info object from json", ->
       T = TypeInfo.registeredClass 'Test'
@@ -53,7 +64,7 @@ describe "TypeInfo", ->
       t.should.have.property 'max', 10
       t.should.have.property 'min', 1
     it "should create a new value object from json", ->
-      obj = 
+      obj =
         name: "Test"
         min:2
         max:6
@@ -77,4 +88,3 @@ describe "TypeInfo", ->
     it "should validate required value and throw error", ->
       validator = TypeInfo('Test').createType required: true
       should.throw validator.validate.bind(validator, null), 'is a invalid'
-
