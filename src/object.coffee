@@ -13,6 +13,8 @@ module.exports  = Type = require './type-info'
 register  = Type.register
 aliases   = Type.aliases
 
+getOwnPropertyNames = Object.getOwnPropertyNames
+
 class ObjectType
   register ObjectType
   aliases ObjectType, 'object'
@@ -43,7 +45,7 @@ class ObjectType
     vType.name = vName.join('.')
     @attributes[aName] = vType
   ###
-    attributes = 
+    attributes =
       attrName:
         required: true
         type: 'string'
@@ -58,7 +60,10 @@ class ObjectType
     @attributes = {}
     return
   _assign: (aOptions)->
-    @defineAttributes(aOptions.attributes) if aOptions and aOptions.attributes
+    if aOptions
+      @defineAttributes(aOptions.attributes) if aOptions.attributes
+      # strict mode: the attribute is only allowed in the options.attributes.
+      @strict = !!aOptions.strict if aOptions.strict
     return
   _encode: (aValue, aOptions)->
     JSON.stringify(aValue)
@@ -77,6 +82,16 @@ class ObjectType
             else
               @errors.push name: String(vType), message: "is invalid"
             result = false
+            #break
+        if @strict
+          for vName in getOwnPropertyNames aValue
+            continue if vName[0] is '$'
+            unless aOptions.attributes.hasOwnProperty vName
+              result = false
+              @errors.push
+                name: '[attribute ' + vName + ']'
+                message: 'is unknown'
+              #break
     result
   # can wrap a common object to an ObjectValue.
   wrapValue:(aObjectValue)->
@@ -88,4 +103,3 @@ class ObjectType
       else
         defineProperty aObjectValue, '$type', @
     aObjectValue
-

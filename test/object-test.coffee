@@ -128,3 +128,10 @@ describe "ObjectType", ->
       should.throw t.validate.bind(t, 11), 'is a invalid'
     it "should validate an encoded value", ->
       t.validate('{"c":""}').should.be.equal true
+    it "should validate on strict mode", ->
+      t1 = t.cloneType strict:true
+      t1.validate('{"e":"","c":""}', false).should.be.equal false
+      t1.errors.should.be.deep.equal [
+        "name": "[attribute e]"
+        "message": "is unknown"
+      ]
