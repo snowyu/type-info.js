@@ -1,4 +1,5 @@
 factory         = require("custom-factory")
+deepEqual       = require('deep-equal')
 isObject        = require("util-ex/lib/is/type/object")
 isFunction      = require("util-ex/lib/is/type/function")
 isString        = require("util-ex/lib/is/type/string")
@@ -14,67 +15,121 @@ try Codec       = require("buffer-codec")
 
 objectToString = Object::toString
 
-getTypeName = (aValue)->
-  if aValue instanceof Object
-    result = objectToString.call aValue
-    i = result.lastIndexOf ' '
-    result = result.substring(i+1, result.length-1) if i >= 0
-  else
-    result = typeof aValue
-  result
-
 class Value
+  @tryGetTypeName: (aValue)->
+    if aValue instanceof Object
+      result = objectToString.call aValue
+      i = result.lastIndexOf ' '
+      result = result.substring(i+1, result.length-1) if i >= 0
+    else
+      result = typeof aValue
+    result
   constructor: (aValue, aType, aOptions)->
+    if not (aType instanceof Type)
+      aOptions = aType
+      vTypeName = Value.tryGetTypeName(aValue)
+      if aOptions
+        # TODO: whether cache this type?
+        aType = Type.create vTypeName, aOptions
+      else
+        aType = Type vTypeName
+      throw new TypeError 'can not determine the value type.' unless aType
     if not (this instanceof Value)
-      if not (aType instanceof Type)
-        aOptions = aType
-        if aOptions
-          aType = Type.create getTypeName(aValue), aOptions
-        else
-          aType = Type getTypeName(aValue)
-      return createObject aType.ValueType, aValue, aType
+      return createObject aType.ValueType, aValue, aType, aOptions
     defineProperty @, '$type', aType
+    @_initialize(aValue, aType, aOptions)
     @assign(aValue)
   isValid: ()->@$type.isValid(@valueOf())
+  _initialize: (aValue, aType, aOptions)->
+    defineProperty @, 'value', null
   _assign:(aValue)->
     @value = aValue
     return
   assign: (aValue, aOptions)->
     checkValidity = aOptions.checkValidity if aOptions
-    if aOptions and aOptions.isEncoded
-      @_assign @$type.decode aValue, aOptions
-    else
-      @$type.validate(aValue, checkValidity) if checkValidity isnt false
-      @_assign aValue
+    if aValue instanceof Value
+      aValue = aValue.valueOf()
+    else if @$type._decodeValue and isString aValue
+      aValue = @$type._decodeValue aValue
+    @$type.validate(aValue, checkValidity) if checkValidity isnt false
+    @_assign aValue
     return @
   create: (aValue, aOptions)->
     @$type.createValue aValue, aOptions
-  clone: @::create
-  toString: ->String(@value)
+  clone: (aOptions) ->
+    @create @valueOf(), aOptions
+  toString: (aOptions)->
+    String(@valueOf())
   valueOf: ->@value
-  # the simple object used to transform to json.
-  _toObject: -> @valueOf()
+  _toObject: (aOptions)->@valueOf()
   toObject: (aOptions)->
+    result = @_toObject(aOptions)
+    result
+  toObjectInfo: (aOptions)->
+    result = @toObject(aOptions)
     aOptions = {} unless aOptions
-    aOptions.value = @_toObject()
-    result = @$type.toObject(aOptions)
+    aOptions.value = result
+    @$type.toObject(aOptions)
+  # assign value from JSON string.
+  fromJson: (aString)->
+    aString = JSON.parse aString
+    decode = @$type._decodeValue
+    aString = decode aString if decode
+    @assign aString
+  # create a new value object from JSON string.
+  createFromJson: (aString)->
+    aString = JSON.parse aString
+    decode = @$type._decodeValue
+    aString = decode aString if decode
+    createObject @$type.ValueType, aString, @$type
+  toJSON: ->
+    result = @toObject()
+    encode = @$type._encodeValue
+    result = encode result if encode
     result
   toJson: (aOptions)->
     result = @toObject(aOptions)
-    result = JSON.stringify result
-    result
+    encode = @$type._encodeValue
+    result = encode result if encode
+    JSON.stringify result
+
 
 module.exports = class Type
   factory Type
 
   @ROOT_NAME: 'type'
+  # export the Value Class from here
   @Value: Value
+  # override for inherited type class:
   ValueType: Value
 
   # inject the pathArray func to modify the aRootName
   @pathArray: inject @pathArray, (aClass, aRootName = Type.ROOT_NAME) ->
-    # pass the modified arguments to old pathArray func:
+    # pass the modified arguments to old pathArray function
     return arguments
+
+  @JSON_ENCODING:
+    name: 'json'
+    encode: JSON.stringify
+    decode: JSON.parse
+  @DEFAULT_ENCODING: @JSON_ENCODING
+  @getEncoding: (encoding)->
+    if !encoding or encoding is Type.DEFAULT_ENCODING.name
+      return Type.DEFAULT_ENCODING
+    if isString encoding
+      if Codec
+        encoding = Codec encoding
+      else
+        throw new TypeError "
+          Should install buffer-codec package first
+          to enable encoding name supports.
+        "
+    if !isFunction(encoding.encode) or
+       !isFunction(encoding.decode) or !encoding.name
+      throw new TypeError "
+        encoding should have name property, encode and decode functions.
+      "
+    encoding
 
   constructor: (aTypeName, aOptions)->
     return super
@@ -89,59 +144,24 @@ module.exports = class Type
   assign: (aOptions)->
     @errors = []
     if aOptions
-      if aOptions.encoding
-        encoding = aOptions.encoding
-        encoding = Codec encoding if Codec and isString encoding
-        if isFunction(encoding.encode) and
-           isFunction(encoding.decode) and encoding.name
-          @encoding = encoding
-        else
-          throw new TypeError "
-            encoding should have name property, encode and decode functions.
-          "
+      @encoding = Type.getEncoding aOptions.encoding
       @required = aOptions.required if aOptions.required?
       @parent   = aOptions.parent if aOptions.parent
       @name = aOptions.name if aOptions.name
+    else
+      @encoding = Type.getEncoding()
     @_assign aOptions if @_assign
     @
-  _isEncoded:->false
-  isEncoded: (aValue, aOptions)->
-    result = aOptions.isEncoded if aOptions
-    result = @_isEncoded(aValue, aOptions) unless result?
-    result
-  encodeValue: (aValue, aOptions)->
-    aValue = @encoding.encode aValue, aOptions if @encoding
-    aValue = @_encode aValue, aOptions if @_encode
-    aValue
-  encode: (aValue, aOptions)->
-    if @value and arguments.length <= 1
-      aOptions = aValue
-      aValue = @value
-    checkValidity = aOptions.checkValidity if aOptions
-    @validate(aValue, checkValidity) if checkValidity isnt false
-    aValue = @encodeValue aValue, aOptions
-    aValue
-  decodeString: (aString, aOptions)->
-    aString = @encoding.decode aString, aOptions if @encoding
-    aString = @_decode aString, aOptions if @_decode
-    checkValidity = aOptions.checkValidity or aOptions.raiseError if aOptions
-    if isUndefined(aString)
-      @error 'decode string to value error', aOptions
-      if checkValidity isnt false
-        throw new TypeError('decode error:string "'+aString+ '" is a invalid '+@name)
-    aString
-  decode: (aString, aOptions)->
-    checkValidity = aOptions.checkValidity if aOptions
-    aString = @decodeString aString, aOptions
-    @validate(aString, checkValidity, aOptions) if checkValidity isnt false
-    aString
-  mergeOptions: (aOptions, aExclude)->
+  mergeOptions: (aOptions, aExclude, aSerialized)->
     aOptions = {} unless isObject aOptions
     if isString aExclude
       aExclude = [aExclude]
     else if not isArray aExclude
       aExclude = []
-    extend aOptions, @, (key)->not (aOptions.hasOwnProperty(key) or (key in aExclude))
+    extend aOptions, @, (key)->
+      result = not aOptions.hasOwnProperty(key) and  not (key in aExclude) and
+        (!aSerialized or key[0] isnt '$')
+      result
     aOptions
   _validate: (aValue, aOptions)->true
   error: (aMessage, aOptions)->
@@ -160,21 +180,39 @@ module.exports = class Type
       raiseError  = aOptions.raiseError
     aOptions = @mergeOptions(aOptions)
     aOptions.raiseError = true if raiseError
-    aValue = @decodeString aValue, aOptions if @isEncoded(aValue, aOptions)
     result = @validateRequired aValue, aOptions
     result = @_validate(aValue, aOptions) if result and aValue?
     if raiseError isnt false and not result
-      throw new TypeError('"'+aValue + '" is a invalid ' + @name)
+      throw new TypeError('"'+aValue + '" is an invalid ' + @name)
     result
   isValid: (aValue) ->
     @validate(aValue, false)
+  #TODO: deeply compare type options
+  # need ignore redundant properties in aOptions, skip some properties, custom filter.
+  isSame: (aOptions)->
+    #deepEqual @, aOptions
+    for k,v of @
+      if k is 'encoding'
+        if (v.name isnt Type.DEFAULT_ENCODING.name) or aOptions[k]?
+          return false unless aOptions[k].name is v.name
+        continue
+      return false unless deepEqual aOptions[k], v
+    return true
+
   createValue: (aValue, aOptions)->
-    if aOptions
+    if aOptions and not @isSame(aOptions)
       aOptions = @mergeOptions(aOptions)
-      vType = createObject @Class, aOptions
+      # TODO: seperate the cache-able ability
+      if isFunction Type.getCacheItem
+        # this Type Factory is cache-able.
+        aOptions.cached = true unless aOptions.cached?
+        vType = Factory.getCacheItem @Class, aOptions
+      else
+        vType = @createType aOptions
     else
       vType = @
-    Value aValue, vType
+    #Value(aValue, vType, aOptions)
+    createObject vType.ValueType, aValue, vType, aOptions
   create: @::createValue
   createType: (aOptions)->
     delete aOptions.value if aOptions
@@ -184,52 +222,54 @@ module.exports = class Type
     aOptions.name = @name unless aOptions.name
     @createType aOptions
   clone: @::cloneType
-  # Get aType class from the encoded string.
-  fromString: (aString, aOptions)->
-    aString = @encoding.decode aString, aOptions if @encoding
-    if isString(aString) and not isObject(aString)
-      throw new TypeError("should decode string to object")
-    Type aString
-  createfromString: (aString, aOptions)->
-    aString = @encoding.decode aString, aOptions if @encoding
-    if isString(aString) and not isObject(aString)
-      throw new TypeError("should decode string to object")
-    vType = aString.name
-    vType = Type.registeredClass vType
-    if vType then createObject vType, aString
   # Get a global Type class or create new Value from the json string.
   @fromJson: (aString)->
-    aString = JSON.parse aString
-    result = Type aString
-    if aString.value? and result
-      result = result.createValue aString.value, aString
-    result
+    #aString = JSON.parse aString
+    Type.from JSON.parse(aString)
   # create a new Type instance  or create new Value from json string.
   @createFromJson: (aString)->
-    aString = JSON.parse aString
-    result = Type.create aString.name, aString
-    if aString.value? and result
-      result = result.createValue aString.value, aString
+    Type.createFrom JSON.parse aString
+
+  encode: (aOptions)->
+    aOptions = @mergeOptions(aOptions, null, true)
+    aOptions.encoding.encode @toObject(aOptions)
+  decode: (aEncoded, aOptions) ->
+    aOptions = @mergeOptions(aOptions)
+    aOptions.encoding.decode aEncoded
+
+  @from: (aObject) ->
+    result = Type aObject
+    if aObject.value? and result
+      result = result.createValue aObject.value
+    result
+  @createFrom: (aObject)->
+    value   = aObject.value
+    result  = Type.create aObject.name, aObject
+    result  = result.createValue value if value? and result
     result
 
-  toString: ->
+  toString: (aOptions)->
     if not @parent then '[type '+ @name+']' else '[attribute ' +@name+']'
+  toJSON: ()-> @toObject()
   toJson: (aOptions)->
     result = @toObject(aOptions)
     result = JSON.stringify result
     result
-  toObject: (aOptions)->
-    result = extend {}, @
+  _toObject:(aOptions)->
+    result = @mergeOptions aOptions, null, true
     result.name = @name
     result.fullName = @path()
-    result.encoding = @encoding.name if @encoding
+    vEncoding = result.encoding
+    if vEncoding and vEncoding.name isnt Type.DEFAULT_ENCODING.name
+      result.encoding = vEncoding.name
+    else
+      delete result.encoding
+    result
+  toObject: (aOptions)->
     if aOptions
-      value = aOptions.value if aOptions.value?
-      if not aOptions.typeOnly and value?
-        value = value._toObject() if value instanceof Value
-        if aOptions.isEncoded
-          result.value = @encode(value, aOptions)
-          result.isEncoded = true
-        else
-          result.value = value
+      if not aOptions.typeOnly and not isUndefined aOptions.value
+        value = aOptions.value
+      delete aOptions.typeOnly
+    result = @_toObject(aOptions)
+    result.value = value unless isUndefined value
     result

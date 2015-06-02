@@ -17,15 +17,15 @@ class NumberType
   _assign: (aOptions)->
     if aOptions
       extend @, aOptions, (k,v)=>
-        result = k in ['min', 'max'] 
+        result = k in ['min', 'max']
         if result
           result = isNumber v
           delete @[k] unless result
         result
       throw TypeError('max should be equal or greater than min') if @min? and @max? and @max < @min
-  _encode: (aValue, aOptions)->
+  _encodeValue: (aValue)->
     aValue = String(aValue)
-  _decode: (aString, aOptions)->
+  _decodeValue: (aString)->
     if isInt aString
       aString = parseInt(aString)
     else if isFloat aString
@@ -33,8 +33,8 @@ class NumberType
     else
       aString = undefined
     aString
-  _isEncoded: (aValue)->isString(aValue)
   _validate: (aValue, aOptions)->
+    aValue = @_decodeValue(aValue) if isString aValue
     result = isNumber aValue
     if result
       if aOptions

@@ -20,15 +20,16 @@ describe "ObjectType", ->
     object.should.be.an.instanceOf Type['Object']
     object.pathArray().should.be.deep.equal ['type','Object']
   describe ".encode()", ->
-    it "should encode value", ->
-      object.encode({}).should.be.equal "{}"
-    it "should throw error when encode invalid value", ->
-      should.throw object.encode.bind(object, 'as'), "is a invalid"
+    it "should encode type info", ->
+      object.encode().should.be.equal '
+        {"attributes":{},"name":"Object","fullName":"/type/Object"}'
   describe ".decode()", ->
-    it "should decode value", ->
-      object.decode("{}").should.be.deep.equal {}
+    it "should decode type info", ->
+      s = '{"attributes":{},"name":"Object","fullName":"/type/Object"}'
+      object.decode(s).should.be.deep.equal
+        "attributes":{},"name":"Object","fullName":"/type/Object"
     it "should throw error when decode invalid string object", ->
-      should.throw object.decode.bind(object, 'as'), "is a invalid"
+      should.throw object.decode.bind(object, 'as')
   describe ".toObject()", ->
     it "should get type info to obj", ->
       result = object.toObject typeOnly: true
@@ -40,12 +41,8 @@ describe "ObjectType", ->
       result = object.create({a:1})
       result = result.toObject()
       #result = extend {}, result #TODO why deep equal is not same?
-      result = JSON.parse JSON.stringify result
-      expected =
-        attributes: {}
-        name: 'Object'
-        fullName: '/type/Object'
-        value: { a: 1 }
+      #result = JSON.parse JSON.stringify result
+      expected = { a: 1 }
       result.should.be.deep.equal expected
   describe ".toString()", ->
     it "should get type name if no value", ->
@@ -67,11 +64,7 @@ describe "ObjectType", ->
       result = object.create a:13
       result = result.toJson()
       result = JSON.parse result
-      result.should.be.deep.equal
-        "attributes": {}
-        "name":"Object"
-        "fullName":"/type/Object"
-        value: {a:13}
+      result.should.be.deep.equal {a:13}
   describe ".createValue()", ->
     it "should create a value", ->
       n = object.create({a:12})
@@ -124,11 +117,18 @@ describe "ObjectType", ->
       t.validate({c:"hi", d:{d1:1}}, false).should.be.equal false
       t.errors.should.be.deep.equal ["name": "[attribute d.d2]", "message": "is required"]
     it "should validate a value and raise error", ->
-      should.throw t.validate.bind(t, 0), 'is a invalid'
-      should.throw t.validate.bind(t, 11), 'is a invalid'
+      should.throw t.validate.bind(t, 0), 'is an invalid'
+      should.throw t.validate.bind(t, 11), 'is an invalid'
     it "should validate an encoded value", ->
       t.validate('{"c":""}').should.be.equal true
     it "should validate on strict mode", ->
+      t1 = t.cloneType strict:true
+      t1.validate({"e":"","c":""}, false).should.be.equal false
+      t1.errors.should.be.deep.equal [
+        "name": "[attribute e]"
+        "message": "is unknown"
+      ]
+    it "should validate object string on strict mode", ->
       t1 = t.cloneType strict:true
       t1.validate('{"e":"","c":""}', false).should.be.equal false
       t1.errors.should.be.deep.equal [

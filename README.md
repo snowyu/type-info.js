@@ -47,23 +47,70 @@ assert passwordType isnt passwordType1
 
 more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 
+## Changes
+
+### v0.7.0
+
++ add JSON.stringify(aTypeObject) supports
++ add Type.createFrom(string, encoding) static(class) method
+- remove Type::`_encode` method
+- remove Type::`_decode` method
+- remove Type::`_isEncoded` method
++ add Value::`_encode`, Value::`_decode` optional methods
+  * make sure the value can be converted to json correctly.
++ add Value::fromJson(string)
++ add Value::createFromJson(string)
++ add Value::toString(aOptions)
++ add Value.tryGetTypeName(aValue)
+* Type::mergeOptions(options, exclude, serialized) distinguish serialized and non-serialized parameters
+
 ## TODO
 
-* ObjectType should use ValueType.toObject to transform value.
++ [ObjectType] add AttributeType to defineAttribute
+* [ObjectType] cache the type of attribute
 
 ## Usage
 
-### Develope a new Type:
+### Develop a new Type:
+
+* Type Methods:
+  * `encode(aOptions)`: encode type info to string.
+  * `decode(aString, aOptions)`: decode a string to a type info object.
 
 These methods should be overrided:
 
 * `_initialize(aOptions)`: initialize the options to the type object.
 * `_assign(options)`: assign an options of type to itself.
-* `_encode(aValue, aOptions)`: convert a value to string.
-* `_decode(aString, aOptions)`: convert a string to a value. return undefined if decode failed.
 * `_validate(aValue, aOptions)`: validate a value whether is valid.
-* `_isEncoded(aValue)`: check the value whether is encoded.
-* `ValueType` property: defaults to `Value` Class unless override it.
+* `_encodeValue(value)`: (optional) encode the value, it's used to convert to json.
+* `_decodeValue(value)`: (optional) decode the value, it's used to convert from json.
+* `ValueType` property: (optional) defaults to `Value` Class. unless implement your own value class.
+
+
+The Value Class:
+
+* Properties:
+  * `value`: store the value here.
+  * `$type` *(Type)*: the type of this value.
+* Static/Class Methods:
+  * `tryGetTypeName(Value)`: guess the type name of the value.
+  * `constructor(value[, type[, options]])`: create a value instance.
+    * `value`: the assigned value. it will guess the type of the value if no type provided.
+    * `type` *(Type)*: the type of the value
+    * `options` *(object)*: the optional type of value options. it will create a new type if exists.
+* Methods:
+  * `clone()`: clone this value object.
+  * `assign(value, options)`: assign the value.
+    * `aOptions` *(object)*:
+      * `checkValidity` *(boolean)*: defaults to true.
+  * `fromJson(json)`: assign a value from json string.
+  * `createFromJson(json)`: create a new value object from json string.
+  * `isValid()`: whether the value is valid.
+  * `toObject(aOptions)`: return a parametric object of the value. it wont include type info.
+  * `_toObject(aOptions)`: return the parametric object of this value. the derived class could override this.
+  * `valueOf()`: return the value. the derived class could override this.
+  * `_assign(value)`: assign the value to itself.  the derived class could override this.
+
 
 ```coffee
 
@@ -201,6 +248,44 @@ __return__
 
 * *(object)*: the created type object instance.
 
+#### Type.createFrom(string, encoding)
+
+create a type object or value object from a encoding string.
+
+__arguments__
+
+* `string` *(string)*: the encoding string should be decoded to an object.
+  * `name` *(string)*: the type name required.
+  * `value` : the optional value. return value object if exists.
+* `encoding` *(string or object)*:
+  * 'string': the encoding name. it should install the [buffer-codec](https://github.com/snwyu/node-buffer-codec)
+  * 'object':
+    * `name` *(string)*: the encoding name.
+    * `encode` *(function)*: the encode function.
+    * `decode` *(function)*: the decode function.
+
+__return__
+
+* *(object)*:
+  * the created type object instance with the type info if no value in it.
+  * the created value object instance if value in it.
+
+#### Type.createFromJson(json)
+
+create a type object or value object from a json string.
+
+__arguments__
+
+* `json` *(string)*: the json string with type info.
+  * `name` *(string)*: the type name required.
+  * `value` : the optional value. return value object if exists.
+
+__return__
+
+* *(object)*:
+  * the created type object instance with the type info if no value in it.
+  * the created value object instance if value in it.
+
 #### cloneType()
 
 clone the type object.
@@ -223,20 +308,6 @@ __arguments__
 __return__
 
 * *(object)*: the created type object instance with the type info options.
-
-#### createFromJson(json)
-
-create a new the type object of this type from a json string.
-
-__arguments__
-
-* `json` *(string)*: the json string with type info.
-
-__return__
-
-* *(object)*:
-  * the created type object instance with the type info if no value in it.
-  * the created value object instance if value in it.
 
 #### createValue(value, options)
 
@@ -262,8 +333,7 @@ __arguments__
 
 * `options` *(object)*: optional options
   * `value` *(Type)*: optional value, when value exists, the following options used:
-    * `isEncoded` *(boolean)*:  whether encode the value. defaults to false
-    * `typeOnly` *(boolean)*: just type info if true. defaults to false.
+  * `typeOnly` *(boolean)*: just type info if true. defaults to false.
 
 __return__
 
@@ -277,8 +347,7 @@ __arguments__
 
 * `options` *(object)*: optional options
   * `value` *(Type)*: optional value, when value exists, the following options used:
-    * `isEncoded` *(boolean)*:  whether encode the value. defaults to false
-    * `typeOnly` *(boolean)*: just type info if true. defaults to false.
+  * `typeOnly` *(boolean)*: just type info if true. defaults to false.
 
 __return__
 

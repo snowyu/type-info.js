@@ -16,24 +16,21 @@ describe "StringType", ->
     string.should.be.an.instanceOf Type['String']
     string.pathArray().should.be.deep.equal ['type','String']
   describe ".encode()", ->
-    it "should encode value", ->
-      string.encode('asv').should.be.equal "asv"
-    it "should throw error when value not string type", ->
-      should.throw string.encode.bind(string, 1), "is a invalid"
-    it "should throw error when string length < min", ->
-      string.initialize min: 2
-      should.throw string.encode.bind(string, '1'), "is a invalid"
-    it "should throw error when string length > max", ->
-      string.initialize max: 3
-      should.throw string.encode.bind(string, 'sd123'), "is a invalid"
+    it "should encode type info", ->
+      string.encode().should.be.equal '
+        {"name":"String","fullName":"/type/String"}'
   describe ".decode()", ->
-    it "should decode value", ->
-      string.decode("25").should.be.equal "25"
-    it "should throw error when decode invalid string(exceed length limits)", ->
-      should.throw string.decode.bind(string, 'asddf'), "is a invalid"
+    it "should decode type info", ->
+      s = '{"name":"String","fullName":"/type/String"}'
+      result = string.decode(s)
+      console.log result
+      result.should.be.deep.equal "name":"String","fullName":"/type/String"
+    it "should throw error when decode invalid string", ->
+      should.throw string.decode.bind(string, 'asddf')
   describe ".toObject()", ->
     it "should get type info to obj", ->
-      result = string.toObject typeOnly: true
+      result = string.createType(min:2,max:3).toObject
+        typeOnly: true
       result.should.be.deep.equal
         max:3
         min:2
@@ -42,15 +39,11 @@ describe "StringType", ->
     it "should get value info to obj", ->
       result = string.create("asd")
       result = result.toObject()
-      result.should.be.deep.equal
-        max:3
-        min:2
-        name:"String"
-        fullName:"/type/String"
-        value:"asd"
+      result.should.be.equal "asd"
   describe ".toJson()", ->
     it "should get type info via json string", ->
-      result = string.toJson typeOnly: true
+      result = string.createType(min:2,max:3).toJson
+        typeOnly: true
       result = JSON.parse result
       result.should.be.deep.equal
         max:3
@@ -61,12 +54,7 @@ describe "StringType", ->
       result = string.create("asd")
       result = result.toJson()
       result = JSON.parse result
-      result.should.be.deep.equal
-        max:3
-        min:2
-        name:"String"
-        fullName:"/type/String"
-        value:"asd"
+      result.should.be.equal "asd"
   describe ".createValue()/.create()", ->
     it "should create a value", ->
       s = string.create("123")
@@ -74,6 +62,14 @@ describe "StringType", ->
     it "should not create a value (exceed length limits)", ->
       string.initialize max:3, min:2
       assert.throw string.create.bind(string, "1234")
+    it "should throw error when value not string type", ->
+      should.throw string.create.bind(string, 1), "is an invalid"
+    it "should throw error when string length < min", ->
+      string.initialize min: 2
+      should.throw string.create.bind(string, '1'), "is an invalid"
+    it "should throw error when string length > max", ->
+      string.initialize max: 3
+      should.throw string.create.bind(string, 'sd123'), "is an invalid"
   describe ".assign()", ->
     it "should assign a value", ->
       n = string.create('12')

@@ -14,6 +14,7 @@ register  = Type.register
 aliases   = Type.aliases
 
 getOwnPropertyNames = Object.getOwnPropertyNames
+getObjectKeys = Object.keys
 
 class ObjectType
   register ObjectType
@@ -29,7 +30,11 @@ class ObjectType
       throw TypeError("no such type registered:"+aOptions) unless vType
       aOptions = null
     else if aOptions.type
-      vType = Type(aOptions.type)
+      vType = aOptions.type
+      if Object.keys(aOptions).length > 1
+        vType = Type.create(vType, aOptions)
+      else
+        vType = Type(vType)
       throw TypeError('no such type registered:'+aOptions.type) unless vType
     else
       vType = ObjectType.defaultType
@@ -65,13 +70,21 @@ class ObjectType
       # strict mode: the attribute is only allowed in the options.attributes.
       @strict = !!aOptions.strict if aOptions.strict
     return
+  ###
   _encode: (aValue, aOptions)->
     JSON.stringify(aValue)
   _decode: (aString, aOptions)->
     try result = JSON.parse aString
     result
   _isEncoded: (aValue)->isString(aValue)
+  ###
+  _decodeValue: (aValue)->
+    try result = JSON.parse aValue
+    result
   _validate: (aValue, aOptions)->
+    if isString aValue
+      aValue = @_decodeValue aValue
+
     result = isObject aValue
     if result
       if aOptions and aOptions.attributes
@@ -82,16 +95,16 @@ class ObjectType
             else
               @errors.push name: String(vType), message: "is invalid"
             result = false
-            #break
+            break if aOptions.raiseError
         if @strict
-          for vName in getOwnPropertyNames aValue
+          for vName in getObjectKeys aValue
             continue if vName[0] is '$'
             unless aOptions.attributes.hasOwnProperty vName
               result = false
               @errors.push
                 name: '[attribute ' + vName + ']'
                 message: 'is unknown'
-              #break
+              break if aOptions.raiseError
     result
   # can wrap a common object to an ObjectValue.
   wrapValue:(aObjectValue)->

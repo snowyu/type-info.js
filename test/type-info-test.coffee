@@ -47,7 +47,7 @@ describe "TypeInfo", ->
       t.should.be.instanceOf Value
       vType = t.$type
       vType.should.be.instanceOf TestType
-      vType.should.not.be.equal TypeInfo('Test')
+      vType.should.be.equal TypeInfo('Test')
       vType.should.have.property 'max', 3
       vType.should.have.property 'min', 2
       (""+t).should.be.equal "3"
@@ -87,4 +87,4 @@ describe "TypeInfo", ->
       validator.errors.should.be.deep.equal [{"message": "is required","name": "[type Test]"}]
     it "should validate required value and throw error", ->
       validator = TypeInfo('Test').createType required: true
-      should.throw validator.validate.bind(validator, null), 'is a invalid'
+      should.throw validator.validate.bind(validator, null), 'is an invalid'

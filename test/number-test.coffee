@@ -18,35 +18,43 @@ describe "NumberType", ->
   it "should check max > min options on initialization ", ->
     should.throw number.createType.bind(number, max:1, min:3), 'max should be equal or greater than min'
   describe ".encode()", ->
-    it "should encode value", ->
-      number.encode(0xff).should.be.equal "255"
-    it "should throw error when encode invalid value", ->
-      should.throw number.encode.bind(number, 'as'), "is a invalid"
-    it "should throw error when value < min", ->
-      number.initialize min: 5
-      should.throw number.encode.bind(number, '1'), "is a invalid"
-    it "should throw error when value > max", ->
-      number.initialize max: 34
-      should.throw number.encode.bind(number, '125'), "is a invalid"
+    it "should encode number type info", ->
+      number.encode().should.be.equal '
+        {"name":"Number","fullName":"/type/Number"}'
   describe ".decode()", ->
-    it "should decode value", ->
-      number.decode("25").should.be.equal 25
-    it "should throw error when decode invalid string number", ->
-      should.throw number.decode.bind(number, 'as'), "is a invalid"
+    it "should decode number type info", ->
+      s = '{"min":2,"max":10,"name":"Number","fullName":"/type/Number"}'
+      number.decode(s).should.be.deep.equal
+        "min":2
+        "max":10
+        "name":"Number"
+        "fullName":"/type/Number"
+    it "should throw error when decode invalid number type object", ->
+      should.throw number.decode.bind(number, 'as')
   describe ".toObject()", ->
     it "should get type info to obj", ->
-      result = number.toObject typeOnly: true
+      result = number.createType
+        "max":34
+        "min":5
+      result = result.toObject()
       result.should.be.deep.equal
         "max":34
         "min":5
         "name":"Number"
         "fullName":"/type/Number"
+  describe "value.toObject()", ->
     it "should get value info to obj", ->
-      result = number.create(13)
-      result = result.toObject()
-      result.should.be.deep.equal
+      result = number.createType
         "max":34
         "min":5
+      result = result.createValue 12
+      result = result.toObject()
+      result.should.be.equal 12
+  describe "value.toObjectInfo()", ->
+    it "should get value with type info to obj", ->
+      result = number.create(13)
+      result = result.toObjectInfo()
+      result.should.be.deep.equal
         "name":"Number"
         "fullName":"/type/Number"
         value: 13
@@ -60,7 +68,7 @@ describe "NumberType", ->
       result.should.be.equal '13'
   describe ".toJson()", ->
     it "should get type info via json string", ->
-      result = number.toJson typeOnly: true
+      result = number.clone(min:5, max:34).toJson typeOnly: true
       result = JSON.parse result
       result.should.be.deep.equal
         "max":34
@@ -69,20 +77,14 @@ describe "NumberType", ->
         "fullName":"/type/Number"
     it "should get value info to obj", ->
       result = number.create(13)
-      result = result.toJson()
-      result = JSON.parse result
-      result.should.be.deep.equal
-        "max":34
-        "min":5
-        "name":"Number"
-        "fullName":"/type/Number"
-        value: 13
+      Number(result).should.be.equal 13
   describe ".createValue()/.create()", ->
     it "should create a value", ->
       n = number.create(12)
       assert.equal Number(n), 12
     it "should not create a value (exceed limits)", ->
-      assert.throw number.create.bind(number, 1234)
+      n = number.cloneType min: 1, max:3
+      assert.throw n.create.bind(n, 1234)
   describe ".assign()", ->
     it "should assign a value", ->
       n = number.create(12)
@@ -95,7 +97,7 @@ describe "NumberType", ->
       t.validate(0, false).should.be.equal false
       t.validate(11, false).should.be.equal false
     it "should validate a value and raise error", ->
-      should.throw t.validate.bind(t, 0), 'is a invalid'
-      should.throw t.validate.bind(t, 11), 'is a invalid'
+      should.throw t.validate.bind(t, 0), 'is an invalid'
+      should.throw t.validate.bind(t, 11), 'is an invalid'
     it "should validate an encoded value", ->
       t.validate("5").should.be.equal true
