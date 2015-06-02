@@ -23,7 +23,6 @@ describe "StringType", ->
     it "should decode type info", ->
       s = '{"name":"String","fullName":"/type/String"}'
       result = string.decode(s)
-      console.log result
       result.should.be.deep.equal "name":"String","fullName":"/type/String"
     it "should throw error when decode invalid string", ->
       should.throw string.decode.bind(string, 'asddf')
