@@ -6,7 +6,6 @@ isObject        = require 'util-ex/lib/is/type/object'
 defineProperty  = require 'util-ex/lib/defineProperty'
 extend          = require 'util-ex/lib/extend'
 createFunc      = require 'util-ex/lib/_create-function'
-FunctionValue   = require './value/function'
 module.exports  = Type = require './type-info'
 
 register    = Type.register
@@ -20,6 +19,9 @@ class FunctionType
   register FunctionType
   aliases FunctionType, 'function', 'func', 'method', 'Method'
 
+  _initialize: (aOptions)->
+    @scope = undefined
+    @$globalScope = undefined
   _assign: (aOptions)->
     if aOptions
       #TODO: I have no idea howto save it to JSON.
