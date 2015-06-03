@@ -1,7 +1,7 @@
 {
   "name": "type-info",
   "description": "the mini run-time type infomation of object",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "homepage": "https://github.com/snowyu/type-info.js",
   "repository": {
     "type": "git",
