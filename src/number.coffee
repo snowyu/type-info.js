@@ -14,6 +14,9 @@ class NumberType
   register NumberType
   aliases NumberType, 'number'
 
+  _initialize: (aOptions)->
+    @min = undefined
+    @max = undefined
   _assign: (aOptions)->
     if aOptions
       extend @, aOptions, (k,v)=>
@@ -22,7 +25,8 @@ class NumberType
           result = isNumber v
           delete @[k] unless result
         result
-      throw TypeError('max should be equal or greater than min') if @min? and @max? and @max < @min
+      if @min? and @max? and @max < @min
+        throw TypeError('max should be equal or greater than min')
   _encodeValue: (aValue)->
     aValue = String(aValue)
   _decodeValue: (aString)->

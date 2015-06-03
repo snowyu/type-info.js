@@ -11,6 +11,9 @@ class StringType
   register StringType
   aliases StringType, 'string', 'str'
 
+  _initialize: (aOptions)->
+    @min = undefined
+    @max = undefined
   _assign: (aOptions)->
     if aOptions
       extend @, aOptions, (k,v)=>
