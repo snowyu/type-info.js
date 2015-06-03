@@ -450,13 +450,11 @@ __return__
 
 #### toObject(options)
 
-convert the value to an object. include type info. It could be streamable your value.
+convert the value to an object. It wont include type info. It could be streamable your value.
 
 __arguments__
 
 * `options` *(object)*: optional options
-  * `isEncoded` *(boolean)*:  whether encode the value. defaults to false
-  * `typeOnly` *(boolean)*: just type info if true. defaults to false.
 
 __return__
 
@@ -466,32 +464,23 @@ __return__
 Type  = require 'type-info'
 Value = Type.Value
 
-val = Value(3, min: 1, max: 3)
+val = Value({a:1}, Type 'Object')
 
-console.log val.toObject()
-{
-  min:1
-  max:3
-  name: 'Number'
-  fullName: 'type/Number'
-  value:3
-}
+assert.deepEqual toObject(), {a:1}
 
 ```
 
 #### toJson(options)
 
-convert the value to a json string. include type info. It could be streamable your value.
+convert the value to a json string. It wont include type info. It could be streamable your value.
 
 __arguments__
 
 * `options` *(object)*: optional options
-  * `isEncoded` *(boolean)*:  whether encode the value. defaults to false
-  * `typeOnly` *(boolean)*: just type info if true. defaults to false.
 
 __return__
 
-* *(string)*: the json string with type info and value.
+* *(string)*: the valu of the json string.
 
 ## License
 

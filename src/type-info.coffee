@@ -187,8 +187,9 @@ module.exports = class Type
     result
   isValid: (aValue) ->
     @validate(aValue, false)
-  #TODO: deeply compare type options
-  # need ignore redundant properties in aOptions, skip some properties, custom filter.
+  # TODO: deeply compare type options
+  #   need ignore redundant properties in aOptions,
+  #   skip some properties, custom filter.
   isSame: (aOptions)->
     #deepEqual @, aOptions
     for k,v of @
