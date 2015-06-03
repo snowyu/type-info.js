@@ -82,15 +82,13 @@ class Value
     decode = @$type._decodeValue
     aString = decode aString if decode
     createObject @$type.ValueType, aString, @$type
-  toJSON: ->
-    result = @toObject()
+  toJSON: (aOptions)->
+    result = @toObject(aOptions)
     encode = @$type._encodeValue
     result = encode result if encode
     result
   toJson: (aOptions)->
-    result = @toObject(aOptions)
-    encode = @$type._encodeValue
-    result = encode result if encode
+    result = @toJSON(aOptions)
     JSON.stringify result
 
 
@@ -152,14 +150,16 @@ module.exports = class Type
       @encoding = Type.getEncoding()
     @_assign aOptions if @_assign
     @
+  #TODO: serialize the encoding etc attributes to custom value here.
   mergeOptions: (aOptions, aExclude, aSerialized)->
     aOptions = {} unless isObject aOptions
     if isString aExclude
       aExclude = [aExclude]
     else if not isArray aExclude
       aExclude = []
-    extend aOptions, @, (key)->
-      result = not aOptions.hasOwnProperty(key) and  not (key in aExclude) and
+    extend aOptions, @, (key, value)->
+      result = not aOptions.hasOwnProperty(key) and not (key in aExclude) and
+        value isnt undefined and
         (!aSerialized or key[0] isnt '$')
       result
     aOptions
