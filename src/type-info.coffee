@@ -5,7 +5,7 @@ isFunction      = require("util-ex/lib/is/type/function")
 isString        = require("util-ex/lib/is/type/string")
 isArray         = require("util-ex/lib/is/type/array")
 isUndefined     = require("util-ex/lib/is/type/undefined")
-inject          = require("util-ex/lib/inject")
+#inject          = require("util-ex/lib/inject")
 #isBoolean     = require("util-ex/lib/is/type/boolean")
 extend          = require("util-ex/lib/extend")
 defineProperty  = require("util-ex/lib/defineProperty")
@@ -100,11 +100,6 @@ module.exports = class Type
   @Value: Value
   # override for inherited type class:
   ValueType: Value
-
-  # inject the pathArray func to modify the aRootName
-  @pathArray: inject @pathArray, (aClass, aRootName = Type.ROOT_NAME) ->
-    # pass the modified arguments to old pathArray function
-    return arguments
 
   @JSON_ENCODING:
     name: 'json'
