@@ -123,6 +123,7 @@ These methods could be overridden:
 
 extend    = require 'util-ex/lib/extend'
 isFloat   = require 'util-ex/lib/is/string/float'
+isInt     = require 'util-ex/lib/is/string/int'
 isNumber  = require 'util-ex/lib/is/type/number'
 isString  = require 'util-ex/lib/is/type/string'
 
@@ -136,6 +137,9 @@ class NumberType
   register NumberType
   aliases NumberType, 'number'
 
+  _initialize: (aOptions)->
+    @min = undefined
+    @max = undefined
   _assign: (aOptions)->
     if aOptions
       extend @, aOptions, (k,v)=>
@@ -146,9 +150,9 @@ class NumberType
         result
       if @min? and @max? and @max < @min
         throw TypeError('max should be equal or greater than min')
-  _encode: (aValue, aOptions)->
+  _encodeValue: (aValue)->
     aValue = String(aValue)
-  _decode: (aString, aOptions)->
+  _decodeValue: (aString)->
     if isInt aString
       aString = parseInt(aString)
     else if isFloat aString
@@ -156,8 +160,8 @@ class NumberType
     else
       aString = undefined
     aString
-  _isEncoded: (aValue)->isString(aValue)
   _validate: (aValue, aOptions)->
+    aValue = @_decodeValue(aValue) if isString aValue
     result = isNumber aValue
     if result
       if aOptions
@@ -172,6 +176,7 @@ class NumberType
           if not result
             @error "should be equal or less than maximum value: " + vMax
     result
+
 ```
 ### User
 
@@ -196,7 +201,7 @@ assert.equal number, Type('Number')
 NumberType = Type.registeredClass 'Number'
 
 # create a number value:
-n = Value(2)
+n = Value(2) # try to guess the value type.
 # n = Value(2, number)
 # n = number.create(2)
 # n = number.createValue(2)
