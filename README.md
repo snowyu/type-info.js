@@ -68,18 +68,21 @@ more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 
 + [ObjectType] add AttributeType to defineAttribute
 * [ObjectType] cache the type of attribute
+* parametric object compare
 
 ## Usage
 
 ### Develop a new Type:
 
-* Type Methods:
-  * `encode(aOptions)`: encode type info to string.
-  * `decode(aString, aOptions)`: decode a string to a type info object.
+#### The Type Class
 
-These methods should be overrided:
+* Methods
+  * `encode(aOptions)`: encode type info.
+  * `decode(aEncoded, aOptions)`: decode to a type info object.
 
-* `_initialize(aOptions)`: initialize the options to the type object.
+These methods should be overridden:
+
+* `_initialize(aOptions)`: initialize the type object.
 * `_assign(options)`: assign an options of type to itself.
 * `_validate(aValue, aOptions)`: validate a value whether is valid.
 * `_encodeValue(value)`: (optional) encode the value, it's used to convert to json.
@@ -107,6 +110,10 @@ The Value Class:
   * `createFromJson(json)`: create a new value object from json string.
   * `isValid()`: whether the value is valid.
   * `toObject(aOptions)`: return a parametric object of the value. it wont include type info.
+  * `toObjectInfo(aOptions)`: return a parametric object of the value. it will include type info.
+
+These methods could be overridden:
+
   * `_toObject(aOptions)`: return the parametric object of this value. the derived class could override this.
   * `valueOf()`: return the value. the derived class could override this.
   * `_assign(value)`: assign the value to itself.  the derived class could override this.
@@ -170,7 +177,7 @@ class NumberType
 
 * Type(aTypeName, aOptions)
   * get the type info object from glabal cache.
-* Type.createType(aObject)
+* type.createType(aObject) (Type::createType)
   * create a new type info object instance.
   * the aObject.name should be exists as the type name.
 
@@ -224,8 +231,9 @@ __arguments__
 * `options` *(object)*: optional type options to apply. different types have different options.
   * `parent` *(TypeInfo)*: it should be an attribute if the `parent` exists
   * `required` *(boolean)*: this type is required.
-  * `encoding` *(string or object)*:
+  * `encoding` *(string or object)*: encode/decode the parametric object of the type.
     * 'string': the encoding name. it should install the [buffer-codec](https://github.com/snwyu/node-buffer-codec)
+      * *note*: only the json and bytewise codec could encode complex type currently.
     * 'object':
       * `name` *(string)*: the encoding name.
       * `encode` *(function)*: the encode function.
