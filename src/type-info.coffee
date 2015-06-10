@@ -49,11 +49,11 @@ class Value
     checkValidity = aOptions.checkValidity if aOptions
     if aValue instanceof Value
       aValue = aValue.valueOf()
-    else if @$type._decodeValue and isString aValue
+    else if @$type._decodeValue
       aValue = @$type._decodeValue aValue
     @$type.validate(aValue, checkValidity) if checkValidity isnt false
     @_assign aValue
-    return @
+    @
   create: (aValue, aOptions)->
     @$type.createValue aValue, aOptions
   clone: (aOptions) ->

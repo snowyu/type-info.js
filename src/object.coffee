@@ -79,7 +79,10 @@ class ObjectType
   _isEncoded: (aValue)->isString(aValue)
   ###
   _decodeValue: (aValue)->
-    try result = JSON.parse aValue
+    if isString aValue
+      try result = JSON.parse aValue
+    else
+      result = aValue
     result
   _validate: (aValue, aOptions)->
     if isString aValue

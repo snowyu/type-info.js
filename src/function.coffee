@@ -38,7 +38,11 @@ class FunctionType
       @scope = extend {}, vScope
     return
   _encodeValue: (aValue)->String(aValue)
-  _decodeValue: (aValue)->createFunc aValue, @scope
+  _decodeValue: (aValue)->
+    if isString aValue
+      createFunc aValue, @scope
+    else
+      aValue
   _toObject: (aOptions)->
     result = super aOptions
     vScope = result.scope
