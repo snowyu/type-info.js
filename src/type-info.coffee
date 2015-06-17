@@ -106,9 +106,12 @@ module.exports = class Type
     encode: JSON.stringify
     decode: JSON.parse
   @DEFAULT_ENCODING: @JSON_ENCODING
-  @getEncoding: (encoding)->
+  getEncoding: (encoding)->
     if !encoding or encoding is Type.DEFAULT_ENCODING.name
-      return Type.DEFAULT_ENCODING
+      if @parent
+        return @parent.getEncoding()
+      else
+        return Type.DEFAULT_ENCODING
     if isString encoding
       if Codec
         encoding = Codec encoding
@@ -123,7 +126,6 @@ module.exports = class Type
         encoding should have name property, encode and decode functions.
       "
     encoding
-
   constructor: (aTypeName, aOptions)->
     return super
   initialize: (aOptions)->
@@ -137,12 +139,12 @@ module.exports = class Type
   assign: (aOptions)->
     @errors = []
     if aOptions
-      @encoding = Type.getEncoding aOptions.encoding
-      @required = aOptions.required if aOptions.required?
       @parent   = aOptions.parent if aOptions.parent
+      @encoding = @getEncoding aOptions.encoding
+      @required = aOptions.required if aOptions.required?
       @name = aOptions.name if aOptions.name
     else
-      @encoding = Type.getEncoding()
+      @encoding = @getEncoding()
     @_assign aOptions if @_assign
     @
   #TODO: serialize the encoding etc attributes to custom value here.
