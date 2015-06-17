@@ -9,7 +9,6 @@ inheritsObject  = require 'inherits-ex/lib/inheritsObject'
 ObjectValue     = require './value/object'
 module.exports  = Type = require './type-info'
 
-
 register  = Type.register
 aliases   = Type.aliases
 
@@ -31,10 +30,11 @@ class ObjectType
       aOptions = null
     else if aOptions.type
       vType = aOptions.type
-      if Object.keys(aOptions).length > 1
-        vType = Type.create(vType, aOptions)
-      else
-        vType = Type(vType)
+      vType = Type(vType)
+      #if Object.keys(aOptions).length > 1
+      #  vType = Type.create(vType, aOptions)
+      #else
+      #  vType = Type(vType)
       throw TypeError('no such type registered:'+aOptions.type) unless vType
     else
       vType = ObjectType.defaultType
