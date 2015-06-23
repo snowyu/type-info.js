@@ -14,6 +14,7 @@ class StringType
   _initialize: (aOptions)->
     @min = undefined
     @max = undefined
+    return
   _assign: (aOptions)->
     if aOptions
       extend @, aOptions, (k,v)=>
