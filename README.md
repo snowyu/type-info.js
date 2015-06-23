@@ -69,6 +69,7 @@ more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 + [ObjectType] add AttributeType to defineAttribute
 * [ObjectType] cache the type of attribute
 * parametric object compare
+* remove the encoding from type-info(the fromObject and toObject are enough).
 
 ## Usage
 
@@ -86,7 +87,7 @@ These methods should be overridden:
 * `_assign(options)`: assign an options of type to itself.
 * `_validate(aValue, aOptions)`: validate a value whether is valid.
 * `_encodeValue(value)`: (optional) encode the value, it's used to convert to json.
-* `_decodeValue(value)`: (optional) decode the value, it's used to convert from json.
+* `_decodeValue(value)`: (optional) decode the value, it's used to convert from json and assign from value.
 * `ValueType` property: (optional) defaults to `Value` Class. unless implement your own value class.
 
 
@@ -481,6 +482,12 @@ __arguments__
 __return__
 
 * *(string)*: the valu of the json string.
+
+
+### ObjectType
+
+The Object type can hold the attributes of the object.
+
 
 ## License
 
