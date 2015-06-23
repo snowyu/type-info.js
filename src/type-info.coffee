@@ -10,10 +10,17 @@ isUndefined     = require("util-ex/lib/is/type/undefined")
 extend          = require("util-ex/lib/extend")
 defineProperty  = require("util-ex/lib/defineProperty")
 createObject    = require("inherits-ex/lib/createObject")
+attrMeta        = require './meta/attribute'
+#attributes      = require('./meta/object-attributes')()
 try Codec       = require("buffer-codec")
-#Value           = require("./value")
 
 objectToString = Object::toString
+
+#metaNames = attributes.names
+#NAME = metaNames.name #attrMeta.name.name || 'name'
+#REQUIRED = metaNames.required #.name || 'required'
+NAME = attrMeta.name.name || 'name'
+REQUIRED = attrMeta.required.name || 'required'
 
 class Value
   @tryGetTypeName: (aValue)->
@@ -100,13 +107,14 @@ module.exports = class Type
   @Value: Value
   # override for inherited type class:
   ValueType: Value
+  #attributes: attributes
 
   @JSON_ENCODING:
     name: 'json'
     encode: JSON.stringify
     decode: JSON.parse
   @DEFAULT_ENCODING: @JSON_ENCODING
-  getEncoding: (encoding)->
+  getEncoding: (encoding)-> #depreacted
     if !encoding or encoding is Type.DEFAULT_ENCODING.name
       if @parent
         return @parent.getEncoding()
@@ -139,10 +147,11 @@ module.exports = class Type
   assign: (aOptions)->
     @errors = []
     if aOptions
-      @parent   = aOptions.parent if aOptions.parent
+      #@parent   = aOptions.parent if aOptions.parent
       @encoding = @getEncoding aOptions.encoding
-      @required = aOptions.required if aOptions.required?
-      @name = aOptions.name if aOptions.name
+      @[REQUIRED] = aOptions[REQUIRED] if aOptions[REQUIRED]?
+      vName = aOptions[NAME] || aOptions.name
+      @name = vName if vName and vName isnt @name
     else
       @encoding = @getEncoding()
     @_assign aOptions if @_assign
@@ -155,20 +164,22 @@ module.exports = class Type
     else if not isArray aExclude
       aExclude = []
     extend aOptions, @, (key, value)->
-      result = not aOptions.hasOwnProperty(key) and not (key in aExclude) and
-        value isnt undefined and
-        (!aSerialized or key[0] isnt '$')
+      result = not aOptions.hasOwnProperty(key) and not (key in aExclude)
+      if aSerialized
+        result = result and key[0] isnt '$' and value isnt undefined
       result
     aOptions
   _validate: (aValue, aOptions)->true
   error: (aMessage, aOptions)->
-    name = (aOptions && aOptions.name) || String(@)
+    name = (aOptions && (aOptions[NAME] || aOptions.name)) || String(@)
     @errors.push name: name, message: aMessage
     return
+  isRequired: (aValue, aOptions = @)->
+    vRequired = aOptions[REQUIRED]
+    result = not vRequired or (vRequired is true and aValue?)
   validateRequired: (aValue, aOptions)->
-    result = not aOptions.required or (aOptions.required is true and aValue?)
-    if not result
-      @error 'is required'
+    result = @isRequired aValue, aOptions
+    @error 'is required', aOptions unless result
     result
   validate: (aValue, raiseError, aOptions)->
     @errors = []
@@ -189,7 +200,8 @@ module.exports = class Type
   #   skip some properties, custom filter.
   isSame: (aOptions)->
     #deepEqual @, aOptions
-    for k,v of @
+    for k,v of @mergeOptions()
+      continue if k is 'name'
       if k is 'encoding'
         if (v.name isnt Type.DEFAULT_ENCODING.name) or aOptions[k]?
           return false unless aOptions[k].name is v.name
@@ -247,7 +259,7 @@ module.exports = class Type
     result
 
   toString: (aOptions)->
-    if not @parent then '[type '+ @name+']' else '[attribute ' +@name+']'
+    '[type '+ @name+']'
   toJSON: ()-> @toObject()
   toJson: (aOptions)->
     result = @toObject(aOptions)
@@ -255,7 +267,7 @@ module.exports = class Type
     result
   _toObject:(aOptions)->
     result = @mergeOptions aOptions, null, true
-    result.name = @name
+    result[NAME] = @name
     result.fullName = @path()
     vEncoding = result.encoding
     if vEncoding and vEncoding.name isnt Type.DEFAULT_ENCODING.name
