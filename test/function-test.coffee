@@ -25,8 +25,12 @@ describe "FunctionType", ->
     func.pathArray().should.be.deep.equal ['type','Function']
   describe ".encode()", ->
     it "should encode type info", ->
-      func.encode().should.be.equal '
-        {"scope":{"A":12,"B":15,"log":"log"},"name":"Function","fullName":"/type/Function"}'
+      result = func.encode()
+      result = JSON.parse result
+      result.should.be.deep.equal
+        "scope":{"A":12,"B":15,"log":"log"}
+        "name":"Function"
+        "fullName":"/type/Function"
   describe ".decode()", ->
     it "should decode type info to parametric object", ->
       obj = func.encode()

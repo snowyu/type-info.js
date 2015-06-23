@@ -1,16 +1,20 @@
-extend = require 'util-ex/lib/extend'
-module.exports = Type = require './type-info'
+createObject    = require 'inherits-ex/lib/createObject'
+isNumber        = require 'util-ex/lib/is/type/number'
+isString        = require 'util-ex/lib/is/type/string'
+extend          = require 'util-ex/lib/extend'
+attributes      = createObject require './meta/number-attributes'
+module.exports  = Type = require './type-info'
 
 
 register  = Type.register
 aliases   = Type.aliases
-isNumber  = require 'util-ex/lib/is/type/number'
-isString  = require 'util-ex/lib/is/type/string'
 
 class StringType
   register StringType
   aliases StringType, 'string', 'str'
 
+  $attributes: attributes
+  ###
   _initialize: (aOptions)->
     @min = undefined
     @max = undefined
@@ -26,6 +30,7 @@ class StringType
       if @min? and @max? and @max < @min
         throw new TypeError('max should be equal or greater than min')
     return
+  ###
   _validate: (aValue, aOptions)->
     result = isString(aValue)
     return result unless result

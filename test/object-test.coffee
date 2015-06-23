@@ -31,8 +31,12 @@ describe "ObjectType", ->
     object.pathArray().should.be.deep.equal ['type','Object']
   describe ".encode()", ->
     it "should encode type info", ->
-      object.encode().should.be.equal '
-        {"attributes":{},"name":"Object","fullName":"/type/Object"}'
+      result = object.encode()
+      result = JSON.parse result
+      result.should.be.deep.equal
+        "name":"Object"
+        "fullName":"/type/Object"
+        "attributes":{}
   describe ".decode()", ->
     it "should decode type info", ->
       s = '{"attributes":{},"name":"Object","fullName":"/type/Object"}'
@@ -47,6 +51,24 @@ describe "ObjectType", ->
         "attributes": {}
         "name":"Object"
         "fullName":"/type/Object"
+    it "should get type info to obj with simple attributes", ->
+      attrs = 
+        a:"string"
+        d:
+          type: "object"
+          attributes:
+            d1:"number"
+      t = object.cloneType attributes: attrs
+      result = t.toObject()
+      result.should.be.deep.equal
+        name: 'Object'
+        fullName: '/type/Object'
+        attributes:
+          a: "String"
+          d:
+            type: "Object"
+            attributes:
+              d1: "Number"
     it "should get type info to obj with attributes", ->
       attrs = 
         a:"string"

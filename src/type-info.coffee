@@ -11,14 +11,15 @@ extend          = require("util-ex/lib/extend")
 defineProperty  = require("util-ex/lib/defineProperty")
 createObject    = require("inherits-ex/lib/createObject")
 attrMeta        = require './meta/attribute'
-#attributes      = require('./meta/object-attributes')()
+attributes      = require('./meta/type-attributes')()
 try Codec       = require("buffer-codec")
 
-objectToString = Object::toString
+objectToString  = Object::toString
+getObjectKeys   = Object.keys
 
-#metaNames = attributes.names
-#NAME = metaNames.name #attrMeta.name.name || 'name'
-#REQUIRED = metaNames.required #.name || 'required'
+metaNames = attributes.names
+#NAME = metaNames.name
+#REQUIRED = metaNames.required
 NAME = attrMeta.name.name || 'name'
 REQUIRED = attrMeta.required.name || 'required'
 
@@ -107,7 +108,7 @@ module.exports = class Type
   @Value: Value
   # override for inherited type class:
   ValueType: Value
-  #attributes: attributes
+  $attributes: attributes
 
   @JSON_ENCODING:
     name: 'json'
@@ -147,27 +148,40 @@ module.exports = class Type
   assign: (aOptions)->
     @errors = []
     if aOptions
-      #@parent   = aOptions.parent if aOptions.parent
       @encoding = @getEncoding aOptions.encoding
-      @[REQUIRED] = aOptions[REQUIRED] if aOptions[REQUIRED]?
-      vName = aOptions[NAME] || aOptions.name
-      @name = vName if vName and vName isnt @name
+      # assign aOptions to @
+      if @$attributes
+        @$attributes.assignTo(aOptions, @)
+      else
+        @[REQUIRED] = aOptions[REQUIRED] if aOptions[REQUIRED]?
+        vName = aOptions[NAME] || aOptions.name
+        @name = vName if vName and vName isnt @name
     else
       @encoding = @getEncoding()
     @_assign aOptions if @_assign
     @
   #TODO: serialize the encoding etc attributes to custom value here.
+  # merge self to options(do not modify the original options)
   mergeOptions: (aOptions, aExclude, aSerialized)->
     aOptions = {} unless isObject aOptions
+
     if isString aExclude
-      aExclude = [aExclude]
-    else if not isArray aExclude
-      aExclude = []
-    extend aOptions, @, (key, value)->
-      result = not aOptions.hasOwnProperty(key) and not (key in aExclude)
-      if aSerialized
-        result = result and key[0] isnt '$' and value isnt undefined
-      result
+      aExclude = getObjectKeys(aOptions).concat aExclude
+    else if isArray aExclude
+      aExclude = aExclude.concat getObjectKeys(aOptions)
+    else
+      aExclude = getObjectKeys(aOptions)
+
+    if @$attributes
+      @$attributes.assignTo(@, aOptions, aExclude, aSerialized)
+      aOptions.encoding = @encoding unless aOptions.encoding
+    else
+      extend aOptions, @, (key, value)->
+        result = not aOptions.hasOwnProperty(key) and not (key in aExclude)
+        if aSerialized
+          result = result and key[0] isnt '$' and value isnt undefined
+        result
+    delete aOptions.name
     aOptions
   _validate: (aValue, aOptions)->true
   error: (aMessage, aOptions)->
@@ -226,9 +240,10 @@ module.exports = class Type
   create: @::createValue
   createType: (aOptions)->
     delete aOptions.value if aOptions
-    createObject @Class, aOptions
+    result = createObject @Class, aOptions
+    result
   cloneType: (aOptions)->
-    aOptions = @mergeOptions(aOptions)
+    aOptions = @mergeOptions(aOptions, null, true)
     aOptions.name = @name unless aOptions.name
     @createType aOptions
   clone: @::cloneType

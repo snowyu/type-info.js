@@ -1,3 +1,4 @@
+createObject    = require 'inherits-ex/lib/createObject'
 extend          = require 'util-ex/lib/extend'
 isFloat         = require 'util-ex/lib/is/string/float'
 isInt           = require 'util-ex/lib/is/string/int'
@@ -9,6 +10,7 @@ inheritsObject  = require 'inherits-ex/lib/inheritsObject'
 createObject    = require("inherits-ex/lib/createObject")
 ObjectValue     = require './value/object'
 attrMeta        = require './meta/attribute'
+attributes      = createObject require './meta/object-attributes'
 module.exports  = Type = require './attribute'
 
 AttributeType   = Type.Attribute
@@ -28,6 +30,7 @@ class ObjectType
 
   @defaultType: Type('string')
   ValueType: ObjectValue
+  $attributes: attributes
   ###
     aOptions(string): the type name.
     aOptions(AttributeType)
@@ -89,7 +92,7 @@ class ObjectType
     result
   _assign: (aOptions)->
     if aOptions
-      @defineAttributes(aOptions.attributes) if aOptions.attributes
+      #@defineAttributes(aOptions.attributes) if aOptions.attributes
       # strict mode: the attribute is only allowed in the options.attributes.
       @strict = !!aOptions.strict if aOptions.strict
     return
@@ -128,7 +131,7 @@ class ObjectType
                 @errors.push name: vName, message: e.message
               vType.errors = []
             else
-              @errors.push name: vType.getName(), message: "is invalid"
+              @errors.push name: vType.name, message: "is invalid"
             result = false
             break if aOptions.raiseError
         if @strict

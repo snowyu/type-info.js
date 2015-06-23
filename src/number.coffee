@@ -1,10 +1,11 @@
-extend    = require 'util-ex/lib/extend'
-isFloat   = require 'util-ex/lib/is/string/float'
-isInt     = require 'util-ex/lib/is/string/int'
-isNumber  = require 'util-ex/lib/is/type/number'
-isString  = require 'util-ex/lib/is/type/string'
-
-module.exports = Type = require './type-info'
+createObject    = require 'inherits-ex/lib/createObject'
+extend          = require 'util-ex/lib/extend'
+isFloat         = require 'util-ex/lib/is/string/float'
+isInt           = require 'util-ex/lib/is/string/int'
+isNumber        = require 'util-ex/lib/is/type/number'
+isString        = require 'util-ex/lib/is/type/string'
+attributes      = createObject require './meta/number-attributes'
+module.exports  = Type = require './type-info'
 
 
 register  = Type.register
@@ -14,6 +15,8 @@ class NumberType
   register NumberType
   aliases NumberType, 'number'
 
+  $attributes: attributes
+  ###
   _initialize: (aOptions)->
     @min = undefined
     @max = undefined
@@ -27,6 +30,7 @@ class NumberType
         result
       if @min? and @max? and @max < @min
         throw TypeError('max should be equal or greater than min')
+  ###
   _encodeValue: (aValue)->
     aValue = String(aValue)
   _decodeValue: (aString)->

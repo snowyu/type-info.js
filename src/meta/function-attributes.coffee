@@ -1,0 +1,20 @@
+extend          = require 'util-ex/lib/_extend'
+inherits        = require 'inherits-ex/lib/inherits'
+defineProperty  = require 'util-ex/lib/defineProperty'
+Attributes      = require './type-attributes'
+
+getObjectKeys   = Object.keys
+
+module.exports = class FunctionAttributes
+  inherits FunctionAttributes, Attributes
+
+  @attrs: attrs =
+    scope:
+      type: 'Object'
+    $globalScope:
+      type: 'Object'
+
+  initialize: (aOptions)->
+    super(aOptions)
+    @_initialize(attrs)
+    return

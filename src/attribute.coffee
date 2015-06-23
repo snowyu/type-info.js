@@ -34,6 +34,7 @@ class AttributeType
   register AttributeType
   aliases AttributeType, 'attribute'
 
+  $attributes: undefined
   @metaNames: metaNames
   @defaultType: Type('string')
   _initialize: (aOptions)->
