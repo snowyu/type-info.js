@@ -41,6 +41,7 @@ describe "TypeInfo", ->
       t.should.be.equal TypeInfo('Test')
       t.should.have.property 'max', 3
       t.should.have.property 'min', 2
+      t.should.have.property 'name', 'Test'
     it "should create Value object from json", ->
       t = TypeInfo.fromJson('{"name":"Test","min":2, "max":3, "value":3}')
       should.exist t
