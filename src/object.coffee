@@ -6,11 +6,18 @@ isNumber        = require 'util-ex/lib/is/type/number'
 isString        = require 'util-ex/lib/is/type/string'
 defineProperty  = require 'util-ex/lib/defineProperty'
 inheritsObject  = require 'inherits-ex/lib/inheritsObject'
+createObject    = require("inherits-ex/lib/createObject")
 ObjectValue     = require './value/object'
-module.exports  = Type = require './type-info'
+attrMeta        = require './meta/attribute'
+module.exports  = Type = require './attribute'
 
-register  = Type.register
-aliases   = Type.aliases
+AttributeType   = Type.Attribute
+
+register        = Type.register
+aliases         = Type.aliases
+metaNames       = AttributeType.metaNames
+NAME            = metaNames.name
+TYPE            = metaNames.type
 
 getOwnPropertyNames = Object.getOwnPropertyNames
 getObjectKeys = Object.keys
@@ -21,34 +28,41 @@ class ObjectType
 
   @defaultType: Type('string')
   ValueType: ObjectValue
+  ###
+    aOptions(string): the type name.
+    aOptions(AttributeType)
+    aOptions(Type): the type of this attribute.
+    aOptions(object):
+      required: Boolean
+      type: ...
+  ###
   defineAttribute: (aName, aOptions)->
     throw TypeError('defineAttribute has no attribute name') unless aName and aName.length
     throw TypeError('the attribute "' + aName + '" has already defined.') if @attributes[aName]?
     if isString aOptions
       vType = Type(aOptions)
       throw TypeError("no such type registered:"+aOptions) unless vType
-      aOptions = null
-    else if aOptions.type
-      vType = aOptions.type
-      vType = Type(vType)
-      #if Object.keys(aOptions).length > 1
-      #  vType = Type.create(vType, aOptions)
-      #else
-      #  vType = Type(vType)
-      throw TypeError('no such type registered:'+aOptions.type) unless vType
-    else
-      vType = ObjectType.defaultType
-    aOptions = @mergeOptions(aOptions, ['attributes', 'name'])
-    aOptions.name = aName
-    aOptions.parent = vParent = @
-    vType = vType.cloneType(aOptions)
-    vName = [aName]
-    while vParent && vParent.name isnt 'Object'
-      vName.push vParent.name
-      vParent = vParent.parent
-    vName.reverse()
-    vType.name = vName.join('.')
-    @attributes[aName] = vType
+      aOptions = {}
+      aOptions[TYPE] = vType
+    else if aOptions instanceof AttributeType
+      vAttribute = aOptions
+    else if aOptions instanceof Type
+      aOptions = {}
+      aOptions[TYPE] = aOptions
+    else if aOptions?
+      if aOptions[TYPE]
+        vType = aOptions[TYPE]
+        vType = Type(vType) #if isString vType
+        throw TypeError('no such type registered:'+aOptions.type) unless vType
+        vType = vType.clone(aOptions) unless vType.isSame(aOptions)
+        aOptions[TYPE] = vType
+      else
+        aOptions[TYPE] = ObjectType.defaultType
+    unless vAttribute
+      aOptions = aOptions || {}
+      aOptions.name = aName
+      vAttribute = createObject AttributeType, aName, aOptions
+    @attributes[aName] = vAttribute
   ###
     attributes =
       attrName:
@@ -64,6 +78,15 @@ class ObjectType
     #defineProperty @, 'attributes', {}
     @attributes = {}
     return
+  _toObject:(aOptions)->
+    result = super(aOptions)
+    result.attributes = vAttrs = {}
+    for k,v of @attributes
+      vAttrs[k] = t = v.toObject(aOptions)
+      delete t[NAME]
+      delete t.fullName
+      vAttrs[k] = t[TYPE] if getObjectKeys(t).length is 1
+    result
   _assign: (aOptions)->
     if aOptions
       @defineAttributes(aOptions.attributes) if aOptions.attributes
@@ -92,11 +115,20 @@ class ObjectType
     if result
       if aOptions and aOptions.attributes
         for vName, vType of aOptions.attributes
+          #console.log '    ', vName, '"', aValue[vName], '"',vType.type.toString()
           if not vType.validate aValue[vName], false
-            if vType.errors.length
-              @errors = @errors.concat vType.errors
+            l = vType.errors.length
+            if l
+              for i in [0...l]
+                e = vType.errors[i]
+                vName = vType.name
+                #console.log vName, e.name, e.message
+                unless e.name[0] is '[' or vName is e.name
+                  vName += '.' + e.name
+                @errors.push name: vName, message: e.message
+              vType.errors = []
             else
-              @errors.push name: String(vType), message: "is invalid"
+              @errors.push name: vType.getName(), message: "is invalid"
             result = false
             break if aOptions.raiseError
         if @strict
@@ -105,7 +137,7 @@ class ObjectType
             unless aOptions.attributes.hasOwnProperty vName
               result = false
               @errors.push
-                name: '[attribute ' + vName + ']'
+                name: vName
                 message: 'is unknown'
               break if aOptions.raiseError
     result
