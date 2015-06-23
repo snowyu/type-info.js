@@ -24,7 +24,7 @@
     "klass"
   ],
   "dependencies": {
-    "custom-factory": "~1.3.6",
+    "custom-factory": "~1.3.7",
     "deep-equal": "^1.0.0",
     "inherits-ex": "~1.0.6",
     "util-ex": "~0.3.2"
