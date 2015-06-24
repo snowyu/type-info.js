@@ -2,7 +2,7 @@ createObject    = require 'inherits-ex/lib/createObject'
 isNumber        = require 'util-ex/lib/is/type/number'
 isString        = require 'util-ex/lib/is/type/string'
 extend          = require 'util-ex/lib/extend'
-attributes      = createObject require './meta/number'
+attributes      = createObject require './attribute/number'
 module.exports  = Type = require './type-info'
 
 

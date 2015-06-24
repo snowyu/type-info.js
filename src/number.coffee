@@ -4,7 +4,7 @@ isFloat         = require 'util-ex/lib/is/string/float'
 isInt           = require 'util-ex/lib/is/string/int'
 isNumber        = require 'util-ex/lib/is/type/number'
 isString        = require 'util-ex/lib/is/type/string'
-attributes      = createObject require './meta/number'
+attributes      = createObject require './attribute/number'
 module.exports  = Type = require './type-info'
 
 
