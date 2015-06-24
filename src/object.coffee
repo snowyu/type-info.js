@@ -9,7 +9,6 @@ defineProperty  = require 'util-ex/lib/defineProperty'
 inheritsObject  = require 'inherits-ex/lib/inheritsObject'
 createObject    = require("inherits-ex/lib/createObject")
 ObjectValue     = require './value/object'
-attrMeta        = require './meta/attribute'
 attributes      = createObject require './meta/object'
 module.exports  = Type = require './attribute'
 
@@ -17,9 +16,9 @@ AttributeType   = Type.Attribute
 
 register        = Type.register
 aliases         = Type.aliases
-metaNames       = AttributeType.metaNames
+metaNames       = attributes.names
 NAME            = metaNames.name
-TYPE            = metaNames.type
+TYPE            = AttributeType::$attributes.names.type
 
 getOwnPropertyNames = Object.getOwnPropertyNames
 getObjectKeys = Object.keys

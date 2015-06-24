@@ -1,3 +1,4 @@
+createObject    = require 'inherits-ex/lib/createObject'
 extend          = require 'util-ex/lib/extend'
 isFloat         = require 'util-ex/lib/is/string/float'
 isInt           = require 'util-ex/lib/is/string/int'
@@ -6,7 +7,7 @@ isNumber        = require 'util-ex/lib/is/type/number'
 isString        = require 'util-ex/lib/is/type/string'
 defineProperty  = require 'util-ex/lib/defineProperty'
 inheritsObject  = require 'inherits-ex/lib/inheritsObject'
-attrMeta        = require './meta/attribute'
+attributes      = createObject require './meta/attribute'
 module.exports  = Type = require './type-info'
 
 getOwnPropertyNames = Object.getOwnPropertyNames
@@ -15,32 +16,18 @@ getObjectKeys       = Object.keys
 register  = Type.register
 aliases   = Type.aliases
 
-metaNames = {}
-for k,v of attrMeta
-  metaNames[k] = v.name || k
+metaNames = attributes.names
 
 NAME = metaNames.name
 TYPE = metaNames.type
 REQUIRED = metaNames.required
 
-#metaType = Type 'AttributeMeta'
-
-###
-  parent:?
-  required:
-  type:
-###
 class AttributeType
   register AttributeType
   aliases AttributeType, 'attribute'
 
-  $attributes: undefined
-  @metaNames: metaNames
+  $attributes: attributes
   @defaultType: Type('string')
-  _initialize: (aOptions)->
-    for k,v of metaNames
-      @[v] = attrMeta[v].value unless v is NAME
-    return
   _assign: (aOptions)->
     if isString aOptions
       vType = aOptions
@@ -81,10 +68,6 @@ class AttributeType
   toString: -> '[Attribute ' + @name + ']'
   _toObject: (aOptions)->
     result = super(aOptions)
-    for k,v of result
-      vAttrMeta = attrMeta[k]
-      if vAttrMeta and vAttrMeta.value? and vAttrMeta.value is v
-        delete result[k]
     vType = @[TYPE].toObject(aOptions)
     result[TYPE] = vType[NAME]
     delete vType[NAME]
