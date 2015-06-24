@@ -14,7 +14,7 @@ module.exports = class NumberAttributes
 
   _initialize: (aOptions)->
     super(aOptions)
-    @concat(attrs)
+    @merge(attrs)
     return
   assignTo: (src, dest, aExclude, aSerialized)->
     result = super

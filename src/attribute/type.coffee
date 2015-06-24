@@ -15,7 +15,7 @@ module.exports = class TypeAttributes
       type: 'Boolean'
 
   _initialize: (aOptions)->
-    @concat(attrs)
-    @concat(aOptions)
+    @merge(attrs)
+    super(aOptions)
     return
     

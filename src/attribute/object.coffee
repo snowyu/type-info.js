@@ -18,5 +18,5 @@ module.exports = class ObjectAttributes
 
   _initialize: (aOptions)->
     super(aOptions)
-    @concat(attrs)
+    @merge(attrs)
     return

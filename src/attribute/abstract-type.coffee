@@ -13,11 +13,11 @@ getObjectKeys   = Object.keys
       type: 'Boolean'
 ###
 module.exports = class AbstractTypeAttributes
-  concat: (attrs)->
+  merge: (attrs)->
     for k,v of attrs
       @[k] = v
     return
-  _initialize: (aOptions)-> @concat(aOptions)
+  _initialize: (aOptions)-> @merge(aOptions)
   initialize: (aOptions)->
     @_initialize(aOptions)
     @names = @getNames()
