@@ -16,21 +16,7 @@ class NumberType
   aliases NumberType, 'number'
 
   $attributes: attributes
-  ###
-  _initialize: (aOptions)->
-    @min = undefined
-    @max = undefined
-  _assign: (aOptions)->
-    if aOptions
-      extend @, aOptions, (k,v)=>
-        result = k in ['min', 'max']
-        if result
-          result = isNumber v
-          delete @[k] unless result
-        result
-      if @min? and @max? and @max < @min
-        throw TypeError('max should be equal or greater than min')
-  ###
+
   _encodeValue: (aValue)->
     aValue = String(aValue)
   _decodeValue: (aString)->
