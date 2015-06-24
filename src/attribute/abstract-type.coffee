@@ -6,7 +6,7 @@ getObjectKeys   = Object.keys
 
 ###
   Usage 1:
-  Attributes = require 'type-info/lib/meta/abstract-type'
+  Attributes = require 'type-info/lib/attribute'
   $attributes: Attributes
     required:
       name: 'required'
