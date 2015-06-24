@@ -1,7 +1,7 @@
 extend          = require 'util-ex/lib/_extend'
 inherits        = require 'inherits-ex/lib/inherits'
 defineProperty  = require 'util-ex/lib/defineProperty'
-Attributes      = require './type-attributes'
+Attributes      = require './type'
 
 getObjectKeys   = Object.keys
 

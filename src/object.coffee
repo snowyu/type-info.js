@@ -10,7 +10,7 @@ inheritsObject  = require 'inherits-ex/lib/inheritsObject'
 createObject    = require("inherits-ex/lib/createObject")
 ObjectValue     = require './value/object'
 attrMeta        = require './meta/attribute'
-attributes      = createObject require './meta/object-attributes'
+attributes      = createObject require './meta/object'
 module.exports  = Type = require './attribute'
 
 AttributeType   = Type.Attribute

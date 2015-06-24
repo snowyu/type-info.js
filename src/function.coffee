@@ -7,7 +7,7 @@ defineProperty  = require 'util-ex/lib/defineProperty'
 extend          = require 'util-ex/lib/extend'
 createFunc      = require 'util-ex/lib/_create-function'
 createObject    = require 'inherits-ex/lib/createObject'
-attributes      = createObject require './meta/function-attributes'
+attributes      = createObject require './meta/function'
 module.exports  = Type = require './type-info'
 
 register    = Type.register
