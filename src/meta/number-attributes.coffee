@@ -16,9 +16,9 @@ module.exports = class NumberAttributes
       name: 'max'
       type: 'Number'
 
-  initialize: (aOptions)->
+  _initialize: (aOptions)->
     super(aOptions)
-    @_initialize(attrs)
+    @concat(attrs)
     return
   assignTo: (src, dest, aExclude, aSerialized)->
     result = super

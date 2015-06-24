@@ -20,7 +20,7 @@ module.exports = class ObjectAttributes
     strict:
       type: 'Boolean'
 
-  initialize: (aOptions)->
+  _initialize: (aOptions)->
     super(aOptions)
-    @_initialize(attrs)
+    @concat(attrs)
     return

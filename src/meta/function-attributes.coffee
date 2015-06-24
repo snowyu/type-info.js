@@ -14,7 +14,7 @@ module.exports = class FunctionAttributes
     $globalScope:
       type: 'Object'
 
-  initialize: (aOptions)->
+  _initialize: (aOptions)->
     super(aOptions)
-    @_initialize(attrs)
+    @concat(attrs)
     return
