@@ -1,27 +1,22 @@
-factory         = require("custom-factory")
+factory         = require('custom-factory')
 deepEqual       = require('deep-equal')
-isObject        = require("util-ex/lib/is/type/object")
-isFunction      = require("util-ex/lib/is/type/function")
-isString        = require("util-ex/lib/is/type/string")
-isArray         = require("util-ex/lib/is/type/array")
-isUndefined     = require("util-ex/lib/is/type/undefined")
-#inject          = require("util-ex/lib/inject")
-#isBoolean     = require("util-ex/lib/is/type/boolean")
-extend          = require("util-ex/lib/extend")
-defineProperty  = require("util-ex/lib/defineProperty")
-createObject    = require("inherits-ex/lib/createObject")
-attrMeta        = require './meta/attribute'
-attributes      = require('./meta/type-attributes')()
-try Codec       = require("buffer-codec")
+isObject        = require('util-ex/lib/is/type/object')
+isFunction      = require('util-ex/lib/is/type/function')
+isString        = require('util-ex/lib/is/type/string')
+isArray         = require('util-ex/lib/is/type/array')
+isUndefined     = require('util-ex/lib/is/type/undefined')
+extend          = require('util-ex/lib/extend')
+defineProperty  = require('util-ex/lib/defineProperty')
+createObject    = require('inherits-ex/lib/createObject')
+attributes      = createObject require('./meta/type-attributes')
+try Codec       = require('buffer-codec')
 
 objectToString  = Object::toString
 getObjectKeys   = Object.keys
 
 metaNames = attributes.names
-#NAME = metaNames.name
-#REQUIRED = metaNames.required
-NAME = attrMeta.name.name || 'name'
-REQUIRED = attrMeta.required.name || 'required'
+NAME = metaNames.name
+REQUIRED = metaNames.required
 
 class Value
   @tryGetTypeName: (aValue)->
@@ -125,15 +120,15 @@ module.exports = class Type
       if Codec
         encoding = Codec encoding
       else
-        throw new TypeError "
+        throw new TypeError '
           Should install buffer-codec package first
           to enable encoding name supports.
-        "
+        '
     if !isFunction(encoding.encode) or
        !isFunction(encoding.decode) or !encoding.name
-      throw new TypeError "
+      throw new TypeError '
         encoding should have name property, encode and decode functions.
-      "
+      '
     encoding
   constructor: (aTypeName, aOptions)->
     return super
