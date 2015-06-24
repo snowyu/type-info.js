@@ -9,7 +9,7 @@ isUndefined     = require('util-ex/lib/is/type/undefined')
 extend          = require('util-ex/lib/extend')
 defineProperty  = require('util-ex/lib/defineProperty')
 createObject    = require('inherits-ex/lib/createObject')
-attributes      = createObject require('./attribute/type')
+attributes      = createObject require('./attributes/type')
 #try Codec       = require('buffer-codec')
 
 objectToString  = Object::toString

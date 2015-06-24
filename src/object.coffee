@@ -9,7 +9,7 @@ defineProperty  = require 'util-ex/lib/defineProperty'
 inheritsObject  = require 'inherits-ex/lib/inheritsObject'
 createObject    = require("inherits-ex/lib/createObject")
 ObjectValue     = require './value/object'
-attributes      = createObject require './attribute/object'
+attributes      = createObject require './attributes/object'
 module.exports  = Type = require './attribute'
 
 AttributeType   = Type.Attribute

@@ -91,7 +91,7 @@ We can draw the two concepts related to the type, from here:
 * Value: the value of this type.
 
 The abstract type and value class and are in the src/type-info.coffee file.
-the defined attributes of the abstract type in in the src/attribute/type.coffee file.
+the defined attributes of the abstract type in in the src/attributes/type.coffee file.
 
 #### The Type Class
 

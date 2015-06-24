@@ -9,7 +9,7 @@ chai.use(sinonChai)
 
 TypeInfo        = require '../src/type-info'
 Value           = require '../src/value'
-Attributes      = require '../src/attribute/'
+Attributes      = require '../src/attributes/'
 setImmediate    = setImmediate || process.nextTick
 register        = TypeInfo.register
 

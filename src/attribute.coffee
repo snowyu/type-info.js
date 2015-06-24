@@ -7,7 +7,7 @@ isNumber        = require 'util-ex/lib/is/type/number'
 isString        = require 'util-ex/lib/is/type/string'
 defineProperty  = require 'util-ex/lib/defineProperty'
 inheritsObject  = require 'inherits-ex/lib/inheritsObject'
-attributes      = createObject require './attribute/attribute'
+attributes      = createObject require './attributes/attribute'
 module.exports  = Type = require './type-info'
 
 getOwnPropertyNames = Object.getOwnPropertyNames
