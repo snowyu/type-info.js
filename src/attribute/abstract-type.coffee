@@ -28,6 +28,11 @@ module.exports = class AbstractTypeAttributes
     defineProperty @, 'names', {}
     @initialize(aOptions)
 
+  initializeTo: (dest)->
+    for k,v of @names
+      continue if k is 'name'
+      value = @[k].value
+      dest[v] = value unless value is undefined
   assignTo: (src, dest, aExclude, aSerialized)->
     vNames = @names
     if isString aExclude
@@ -45,6 +50,14 @@ module.exports = class AbstractTypeAttributes
         if aSerialized or !isFunction(vAttr.assign) or !vAttr.assign(dest, src, v)
           dest[v] = src[v]
     return dest
+  isOriginal: (aObject)->
+    result = true
+    for k,v of @names
+      continue if k is 'name'
+      unless aObject[v] is @[k].value
+        result = false
+        break
+    result
   getNames: ->
     result = {}
     for k in getObjectKeys @
