@@ -6,9 +6,6 @@
 
 The mini Run-time Type Infomation.
 
-all typed value could be encode to a string. The encoded string could be decode to a value.
-
-
 ## Concepts
 
 * Primitive Types
@@ -58,8 +55,12 @@ more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 * [ObjectType] cache the type of attribute
 + [Type] isSame to compare parametric object
 - remove the parent attribute
-- *TODO: remove the encoding from type-info*
-- *TODO: rename decodeValue to castValue*
+- remove the encoding from type-info
+  - remove `Type::encode` method
+  - remove `Type::decode` method
+* [Type] `Type(aTypeName, aOptions)`:
+  * get the global instance if no aOptions or aOptions is same as the original default value of attributes.
+  * create a new type object instance else
 
 ### v0.7.0
 
@@ -86,7 +87,7 @@ more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 The type has a name and can verify whether a value belongs to that type.
 We can draw the two concepts related to the type, from here:
 
-* Attributes: the attributes of this type.
+* Attributes: the attributes(meta data) of this type.
 * Value: the value of this type.
 
 The abstract type and value class and are in the src/type-info.coffee file.
@@ -167,7 +168,7 @@ The Attributes class have the following properties and methods:
 
 #### Example
 
-the Number type's attributes:
+the Number type's meta attributes:
 
 ```coffee
 inherits        = require 'inherits-ex/lib/inherits'
@@ -309,13 +310,6 @@ __arguments__
 * `options` *(object)*: optional type options to apply. different types have different options.
   * `parent` *(TypeInfo)*: it should be an attribute if the `parent` exists
   * `required` *(boolean)*: this type is required.
-  * `encoding` *(string or object)*: encode/decode the parametric object of the type.
-    * 'string': the encoding name. it should install the [buffer-codec](https://github.com/snwyu/node-buffer-codec)
-      * *note*: only the json and bytewise codec could encode complex type currently.
-    * 'object':
-      * `name` *(string)*: the encoding name.
-      * `encode` *(function)*: the encode function.
-      * `decode` *(function)*: the decode function.
 
 __return__
 
@@ -334,21 +328,15 @@ __return__
 
 * *(object)*: the created type object instance.
 
-#### Type.createFrom(string, encoding)
+#### Type.createFrom(aObject)
 
-create a type object or value object from a encoding string.
+create a type object or value object from a parametric type object.
 
 __arguments__
 
-* `string` *(string)*: the encoding string should be decoded to an object.
+* `aObject` *(object)*: the encoding string should be decoded to an object.
   * `name` *(string)*: the type name required.
   * `value` : the optional value. return value object if exists.
-* `encoding` *(string or object)*:
-  * 'string': the encoding name. it should install the [buffer-codec](https://github.com/snwyu/node-buffer-codec)
-  * 'object':
-    * `name` *(string)*: the encoding name.
-    * `encode` *(function)*: the encode function.
-    * `decode` *(function)*: the decode function.
 
 __return__
 
@@ -413,7 +401,7 @@ __return__
 
 #### toObject(options)
 
-convert the type info to an object. It could be streamable your type.
+convert the type info to an parametric type object. It could be streamable your type.
 
 __arguments__
 
@@ -428,6 +416,7 @@ __return__
 #### toJson(options)
 
 convert the type info to a json string. It could be streamable your type.
+It is almost equivalent to JSON.stringify(theTypeObject).
 
 __arguments__
 
@@ -507,7 +496,6 @@ __arguments__
 * `value` *(Type)*: the value to be assigned. MUST BE the same type.
 * `options` *(object)*: optional type options.
   * checkValidity *(boolean)*: whether check the value is valid. defaults to true.
-  * isEncoded *(boolean)*: whether the value is encoded. defaults to false.
 
 __return__
 
