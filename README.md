@@ -83,7 +83,19 @@ more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 
 ### Develop a new Type:
 
+The type has a name and can verify whether a value belongs to that type.
+We can draw the two concepts related to the type, from here:
+
+* Attributes: the attributes of this type.
+* Value: the value of this type.
+
+The abstract type and value class and are in the src/type-info.coffee file.
+the defined attributes of the abstract type in in the src/attribute/type.coffee file.
+
 #### The Type Class
+
+* Properties:
+  * $attributes *(object)*: the attributes of this type.
 
 * Methods
   * `encode(aOptions)`: encode type info.
@@ -99,7 +111,7 @@ These methods should be overridden:
 * `ValueType` property: (optional) defaults to `Value` Class. unless implement your own value class.
 
 
-The Value Class:
+#### The Value Class
 
 * Properties:
   * `value`: store the value here.
@@ -127,16 +139,75 @@ These methods could be overridden:
   * `valueOf()`: return the value. the derived class could override this.
   * `_assign(value)`: assign the value to itself.  the derived class could override this.
 
+#### The Attributes class
+
+descripe the attributes of a type. an attribute includes these properties:
+
+* `name` *(string)*: the attribute name.
+* `type` *(string)*: the attribute type.
+* `required` *(boolean)*: the attribute whether it's required(MUST HAVE).
+* `value`: the default value of the attribute.
+* `assign(dest, src, key)` *(function)*: optional special function to assign
+  the attribute's value from src[key] to dest[key].
+  * src, dest: the type object or the parametric type object.
+
+The Attributes class have the following properties and methods:
+
+* Properties
+  * names: the attribute name list to cache from attributes.
+
+* Methods:
+  * `_initialize(aOptions)`: the aOptions is addtional attributes if any.
+  * `merge(attributes)`: merge the attributes into itself.
+  * `assignTo(src, dest, aExclude, aSerialized)`: assign attributes value from the src to dest.
+    * aExclude *(array)*: do not include these attribute name to copy.
+    * aSerialized *(boolean)*: whether used as serialized.
+  * `getNames()`: return the attribute name list(array).
+
+
+#### Example
+
+the Number type's attributes:
+
+```coffee
+inherits        = require 'inherits-ex/lib/inherits'
+Attributes      = require './type'
+
+module.exports = class NumberAttributes
+  inherits NumberAttributes, Attributes
+
+  @attrs: attrs =
+    min:
+      name: 'min'
+      type: 'Number'
+    max:
+      name: 'max'
+      type: 'Number'
+
+  _initialize: (aOptions)->
+    super(aOptions)
+    @merge(attrs)
+    return
+  assignTo: (src, dest, aExclude, aSerialized)->
+    result = super
+    if dest.min? and dest.max? and dest.max < dest.min
+      throw new TypeError('max should be equal or greater than min')
+    result
+    
+```
+
+the Number type:
 
 ```coffee
 
-extend    = require 'util-ex/lib/extend'
-isFloat   = require 'util-ex/lib/is/string/float'
-isInt     = require 'util-ex/lib/is/string/int'
-isNumber  = require 'util-ex/lib/is/type/number'
-isString  = require 'util-ex/lib/is/type/string'
-
-module.exports = Type = require 'type-info'
+createObject    = require 'inherits-ex/lib/createObject'
+extend          = require 'util-ex/lib/extend'
+isFloat         = require 'util-ex/lib/is/string/float'
+isInt           = require 'util-ex/lib/is/string/int'
+isNumber        = require 'util-ex/lib/is/type/number'
+isString        = require 'util-ex/lib/is/type/string'
+attributes      = createObject require './attribute/number'
+module.exports  = Type = require './type-info'
 
 
 register  = Type.register
@@ -146,19 +217,8 @@ class NumberType
   register NumberType
   aliases NumberType, 'number'
 
-  _initialize: (aOptions)->
-    @min = undefined
-    @max = undefined
-  _assign: (aOptions)->
-    if aOptions
-      extend @, aOptions, (k,v)=>
-        result = k in ['min', 'max']
-        if result
-          result = isNumber v
-          delete @[k] unless result
-        result
-      if @min? and @max? and @max < @min
-        throw TypeError('max should be equal or greater than min')
+  $attributes: attributes
+
   _encodeValue: (aValue)->
     aValue = String(aValue)
   _decodeValue: (aString)->
