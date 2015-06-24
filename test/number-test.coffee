@@ -17,20 +17,6 @@ describe "NumberType", ->
     number.pathArray().should.be.deep.equal ['type','Number']
   it "should check max > min options on initialization ", ->
     should.throw number.createType.bind(number, max:1, min:3), 'max should be equal or greater than min'
-  describe ".encode()", ->
-    it "should encode number type info", ->
-      number.encode().should.be.equal '
-        {"name":"Number","fullName":"/type/Number"}'
-  describe ".decode()", ->
-    it "should decode number type info", ->
-      s = '{"min":2,"max":10,"name":"Number","fullName":"/type/Number"}'
-      number.decode(s).should.be.deep.equal
-        "min":2
-        "max":10
-        "name":"Number"
-        "fullName":"/type/Number"
-    it "should throw error when decode invalid number type object", ->
-      should.throw number.decode.bind(number, 'as')
   describe ".toObject()", ->
     it "should get type info to obj", ->
       result = number.createType

@@ -15,18 +15,6 @@ describe "BooleanType", ->
     should.exist bool
     bool.should.be.an.instanceOf Type['Boolean']
     bool.pathArray().should.be.deep.equal ['type','Boolean']
-  describe ".encode()", ->
-    it "should encode type info", ->
-      bool.encode().should.be.equal '
-        {"name":"Boolean","fullName":"/type/Boolean"}'
-  describe ".decode()", ->
-    it "should decode type info", ->
-      s = '{"name":"Boolean","fullName":"/type/Boolean"}'
-      bool.decode(s).should.be.deep.equal
-        "name":"Boolean"
-        "fullName":"/type/Boolean"
-    it "should throw error when decode invalid boolean type object", ->
-      should.throw bool.decode.bind(bool, undefined)
   describe ".toObject()", ->
     it "should get type info to obj", ->
       result = bool.createType()

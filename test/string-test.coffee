@@ -15,17 +15,6 @@ describe "StringType", ->
     should.exist string
     string.should.be.an.instanceOf Type['String']
     string.pathArray().should.be.deep.equal ['type','String']
-  describe ".encode()", ->
-    it "should encode type info", ->
-      string.encode().should.be.equal '
-        {"name":"String","fullName":"/type/String"}'
-  describe ".decode()", ->
-    it "should decode type info", ->
-      s = '{"name":"String","fullName":"/type/String"}'
-      result = string.decode(s)
-      result.should.be.deep.equal "name":"String","fullName":"/type/String"
-    it "should throw error when decode invalid string", ->
-      should.throw string.decode.bind(string, 'asddf')
   describe ".toObject()", ->
     it "should get type info to obj", ->
       result = string.createType(min:2,max:3).toObject

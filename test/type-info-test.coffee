@@ -9,12 +9,21 @@ chai.use(sinonChai)
 
 TypeInfo        = require '../src/type-info'
 Value           = require '../src/value'
+Attributes      = require '../src/attribute/'
 setImmediate    = setImmediate || process.nextTick
 register        = TypeInfo.register
 
 class TestType
   register TestType
+
   constructor: ->return super
+  $attributes: Attributes
+    min:
+      type: 'Number'
+    max:
+      type: 'Number'
+    required:
+      type: 'Boolean'
   initialize: (aOptions)->
     super(aOptions)
     if aOptions
@@ -23,6 +32,17 @@ class TestType
 
 
 describe "TypeInfo", ->
+    it "should get type info object directly", ->
+      t = TestType(min: undefined)
+      should.exist t
+      t.should.be.equal TypeInfo('Test')
+      t.should.have.property 'name', 'Test'
+    it "should create type info object directly", ->
+      t = TestType min:2
+      should.exist t
+      t.should.be.not.equal TypeInfo('Test')
+      t.should.have.property 'min', 2
+      t.should.have.property 'name', 'Test'
   describe ".pathArray()", ->
     it "should get default type path array", ->
       t = TypeInfo('Test')
@@ -36,9 +56,14 @@ describe "TypeInfo", ->
 
   describe ".fromJson()", ->
     it "should get type info object from json", ->
-      t = TypeInfo.fromJson('{"name":"Test","min":2, "max":3}')
+      t = TypeInfo.fromJson('{"name":"Test"}')
       should.exist t
       t.should.be.equal TypeInfo('Test')
+      t.should.have.property 'name', 'Test'
+    it "should create type info object from json", ->
+      t = TypeInfo.fromJson('{"name":"Test","min":2, "max":3}')
+      should.exist t
+      t.should.be.not.equal TypeInfo('Test')
       t.should.have.property 'max', 3
       t.should.have.property 'min', 2
       t.should.have.property 'name', 'Test'
@@ -48,7 +73,7 @@ describe "TypeInfo", ->
       t.should.be.instanceOf Value
       vType = t.$type
       vType.should.be.instanceOf TestType
-      vType.should.be.equal TypeInfo('Test')
+      vType.should.be.not.equal TypeInfo('Test')
       vType.should.have.property 'max', 3
       vType.should.have.property 'min', 2
       (""+t).should.be.equal "3"

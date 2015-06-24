@@ -29,21 +29,6 @@ describe "ObjectType", ->
     should.exist object
     object.should.be.an.instanceOf Type['Object']
     object.pathArray().should.be.deep.equal ['type','Object']
-  describe ".encode()", ->
-    it "should encode type info", ->
-      result = object.encode()
-      result = JSON.parse result
-      result.should.be.deep.equal
-        "name":"Object"
-        "fullName":"/type/Object"
-        "attributes":{}
-  describe ".decode()", ->
-    it "should decode type info", ->
-      s = '{"attributes":{},"name":"Object","fullName":"/type/Object"}'
-      object.decode(s).should.be.deep.equal
-        "attributes":{},"name":"Object","fullName":"/type/Object"
-    it "should throw error when decode invalid string object", ->
-      should.throw object.decode.bind(object, 'as')
   describe ".toObject()", ->
     it "should get type info to obj", ->
       result = object.toObject typeOnly: true
