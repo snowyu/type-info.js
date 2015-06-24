@@ -140,7 +140,7 @@ module.exports = class Type
       if aTypeName
         if isObject aTypeName
           aOptions = aTypeName
-          aTypeName = aOptions.name
+          aTypeName = aOptions.name || aOptions[NAME]
         else if not isString aTypeName
           aOptions = aTypeName
           aTypeName = undefined
