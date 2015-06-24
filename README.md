@@ -260,11 +260,15 @@ class NumberType
 Type  = require 'type-info'
 Value = Type.Value
 
-# get number type info object(Virtual Type):
+# get number type info object
 # you can treat it as a global temporary type object.
-number = Type 'Number', min:1, max:6
+num = Type 'Number'
+assert.equal num, Type('Number')
 
-assert.equal number, Type('Number')
+# get a new number type info object(Virtual Type):
+# create a virtual type object always if the options exists:
+number = Type 'Number', min:1, max:6
+assert.notEqual number, num
 
 # get Number Type Class(Primitive Type):
 NumberType = Type.registeredClass 'Number'
