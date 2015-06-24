@@ -4,17 +4,27 @@ isFunction      = require 'util-ex/lib/is/type/function'
 defineProperty  = require 'util-ex/lib/defineProperty'
 getObjectKeys   = Object.keys
 
+###
+  Usage 1:
+  Attributes = require 'type-info/lib/meta/abstract-type'
+  $attributes: Attributes
+    required:
+      name: 'required'
+      type: 'Boolean'
+###
 module.exports = class AbstractTypeAttributes
   concat: (attrs)->
     for k,v of attrs
       @[k] = v
     return
-  _initialize: (aOptions)->
+  _initialize: (aOptions)-> @concat(aOptions)
   initialize: (aOptions)->
     @_initialize(aOptions)
     @names = @getNames()
     return
   constructor: (aOptions)->
+    if not (this instanceof AbstractTypeAttributes)
+      return new AbstractTypeAttributes aOptions
     defineProperty @, 'names', {}
     @initialize(aOptions)
 
