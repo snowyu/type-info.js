@@ -1,3 +1,4 @@
+isInheritedFrom = require('inherits-ex/lib/isInheritedFrom')
 factory         = require('custom-factory')
 deepEqual       = require('deep-equal')
 isObject        = require('util-ex/lib/is/type/object')
@@ -9,7 +10,7 @@ extend          = require('util-ex/lib/extend')
 defineProperty  = require('util-ex/lib/defineProperty')
 createObject    = require('inherits-ex/lib/createObject')
 attributes      = createObject require('./attribute/type')
-try Codec       = require('buffer-codec')
+#try Codec       = require('buffer-codec')
 
 objectToString  = Object::toString
 getObjectKeys   = Object.keys
@@ -93,6 +94,7 @@ class Value
   toJson: (aOptions)->
     result = @toJSON(aOptions)
     JSON.stringify result
+#End Value class
 
 
 module.exports = class Type
@@ -105,6 +107,7 @@ module.exports = class Type
   ValueType: Value
   $attributes: attributes
 
+  ###
   @JSON_ENCODING:
     name: 'json'
     encode: JSON.stringify
@@ -130,20 +133,46 @@ module.exports = class Type
         encoding should have name property, encode and decode functions.
       '
     encoding
+  ###
   constructor: (aTypeName, aOptions)->
+    # create a new instance object if aOptions is not the original options of the type.
+    if not (this instanceof Type) and not (aTypeName instanceof Type)
+      if aTypeName
+        if isObject aTypeName
+          aOptions = aTypeName
+          aTypeName = aOptions.name
+        else if not isString aTypeName
+          aOptions = aTypeName
+          aTypeName = undefined
+      if not aTypeName
+        # arguments.callee is forbidden if strict mode enabled.
+        try vCaller = arguments.callee.caller
+        if vCaller and isInheritedFrom vCaller, Type
+          aTypeName = vCaller
+          vCaller = vCaller.caller
+          #get farest hierarchical registered class
+          while isInheritedFrom vCaller, aTypeName
+            aTypeName = vCaller
+            vCaller = vCaller.caller
+          aTypeName = Type.getNameFromClass(aTypeName) if aTypeName
+        return unless aTypeName
+      vTypeClass = Type.registeredClass aTypeName
+      if vTypeClass and aOptions and not vTypeClass::$attributes.isOriginal(aOptions)
+        return createObject vTypeClass, aOptions
     return super
   initialize: (aOptions)->
     defineProperty @, 'errors', null
+    @$attributes.initializeTo @ if @$attributes
     @_initialize aOptions if @_initialize
     @assign(aOptions)
   finalize: (aOptions)->
     @errors = null if @errors
-    @encoding = null if @encoding
+    #@encoding = null if @encoding
     @_finalize(aOptions) if @_finalize
   assign: (aOptions)->
     @errors = []
     if aOptions
-      @encoding = @getEncoding aOptions.encoding
+      #@encoding = @getEncoding aOptions.encoding
       # assign aOptions to @
       if @$attributes
         @$attributes.assignTo(aOptions, @)
@@ -151,11 +180,10 @@ module.exports = class Type
         @[REQUIRED] = aOptions[REQUIRED] if aOptions[REQUIRED]?
         vName = aOptions[NAME] || aOptions.name
         @name = vName if vName and vName isnt @name
-    else
-      @encoding = @getEncoding()
+    #else
+    #  @encoding = @getEncoding()
     @_assign aOptions if @_assign
     @
-  #TODO: serialize the encoding etc attributes to custom value here.
   # merge self to options(do not modify the original options)
   mergeOptions: (aOptions, aExclude, aSerialized)->
     aOptions = {} unless isObject aOptions
@@ -166,17 +194,18 @@ module.exports = class Type
       aExclude = aExclude.concat getObjectKeys(aOptions)
     else
       aExclude = getObjectKeys(aOptions)
+    aExclude.push 'name'
 
     if @$attributes
       @$attributes.assignTo(@, aOptions, aExclude, aSerialized)
-      aOptions.encoding = @encoding unless aOptions.encoding
+      #aOptions.encoding = @encoding unless aOptions.encoding
     else
       extend aOptions, @, (key, value)->
         result = not aOptions.hasOwnProperty(key) and not (key in aExclude)
         if aSerialized
           result = result and key[0] isnt '$' and value isnt undefined
         result
-    delete aOptions.name
+    #delete aOptions.name
     aOptions
   _validate: (aValue, aOptions)->true
   error: (aMessage, aOptions)->
@@ -211,10 +240,12 @@ module.exports = class Type
     #deepEqual @, aOptions
     for k,v of @mergeOptions()
       continue if k is 'name'
+      ###
       if k is 'encoding'
         if (v.name isnt Type.DEFAULT_ENCODING.name) or aOptions[k]?
           return false unless aOptions[k].name is v.name
         continue
+      ###
       return false unless deepEqual aOptions[k], v
     return true
 
@@ -242,7 +273,8 @@ module.exports = class Type
     aOptions.name = @name unless aOptions.name
     @createType aOptions
   clone: @::cloneType
-  # Get a global Type class or create new Value from the json string.
+  # Get(create) a global Type class or create new Value from the json string.
+  # it will create a new type object if options is not the original type options.
   @fromJson: (aString)->
     #aString = JSON.parse aString
     Type.from JSON.parse(aString)
@@ -250,13 +282,17 @@ module.exports = class Type
   @createFromJson: (aString)->
     Type.createFrom JSON.parse aString
 
+  ###
   encode: (aOptions)->
     aOptions = @mergeOptions(aOptions, null, true)
     aOptions.encoding.encode @toObject(aOptions)
   decode: (aEncoded, aOptions) ->
+    aOptions = aOptions.encoding.decode aEncoded
     aOptions = @mergeOptions(aOptions)
-    aOptions.encoding.decode aEncoded
+  ###
 
+  # Get(create) a global Type class or create new Value from the parametric type object.
+  # it will create a new type object if options is not the original(default) type options.
   @from: (aObject) ->
     result = Type aObject
     if aObject.value? and result
@@ -279,11 +315,13 @@ module.exports = class Type
     result = @mergeOptions aOptions, null, true
     result[NAME] = @name
     result.fullName = @path()
+    ###
     vEncoding = result.encoding
     if vEncoding and vEncoding.name isnt Type.DEFAULT_ENCODING.name
       result.encoding = vEncoding.name
     else
       delete result.encoding
+    ###
     result
   toObject: (aOptions)->
     if aOptions
