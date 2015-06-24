@@ -49,6 +49,18 @@ more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 
 ## Changes
 
+
+### v0.8.0
+
++ [Type] $attributes to hold the type's attributes.
++ the type's attributes definition in attribute folder.
++ [ObjectType] add AttributeType to defineAttribute
+* [ObjectType] cache the type of attribute
++ [Type] isSame to compare parametric object
+- remove the parent attribute
+- *TODO: remove the encoding from type-info*
+- *TODO: rename decodeValue to castValue*
+
 ### v0.7.0
 
 + add JSON.stringify(aTypeObject) supports
@@ -66,10 +78,6 @@ more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 
 ## TODO
 
-+ [ObjectType] add AttributeType to defineAttribute
-* [ObjectType] cache the type of attribute
-* parametric object compare
-* remove the encoding from type-info(the fromObject and toObject are enough).
 
 ## Usage
 
