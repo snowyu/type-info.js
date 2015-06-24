@@ -81,16 +81,13 @@ class AttributeType
     result
   _validate: (aValue, aOptions)->
     if aOptions
-      #console.log 'attr val', @name, String(aOptions[TYPE]), aValue
       vType   = aOptions[TYPE]
       if vType
         result  = vType.validate aValue, false
         if not result
           if vType.errors.length
             @errors = vType.errors
-            #@errors = @errors.concat vType.errors
             vType.errors = []
           else
             @errors.push name: String(vType), message: "is invalid"
-    #console.log 'attr', @name, aValue, result, vType && vType.name
     result
