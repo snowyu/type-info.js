@@ -14,6 +14,11 @@ module.exports = class TypeAttributes
       name: 'required'
       type: 'Boolean'
 
+  constructor: (aOptions)->
+    if not (this instanceof TypeAttributes)
+      return new TypeAttributes aOptions
+    return super aOptions
+
   _initialize: (aOptions)->
     @merge(attrs)
     super(aOptions)
