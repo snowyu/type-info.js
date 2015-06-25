@@ -160,9 +160,8 @@ The Attributes class have the following properties and methods:
 * Methods:
   * `_initialize(aOptions)`: the aOptions is addtional attributes if any.
   * `merge(attributes)`: merge the attributes into itself.
-  * `assignTo(src, dest, aExclude, aSerialized)`: assign attributes value from the src to dest.
-    * aExclude *(array)*: do not include these attribute name to copy.
-    * aSerialized *(boolean)*: whether used as serialized.
+  * `assignTo(src, dest, aExclude)`: assign attributes value from the src to dest.
+    * aExclude *(array)*: do not include these attributes to copy.
   * `getNames()`: return the attribute name list(array).
 
 
@@ -548,6 +547,10 @@ __return__
 
 The Object type can hold the attributes of the object.
 
+* Object Type Attributes:
+  * `attributes` *(object)*: this object's attribute list.
+  * `strict` *(boolean)*: whether treat this object as strict mode. defaults to false.
+    * the object can only have attributes in the attributes list if strict mode is enabled.
 
 ## License
 
