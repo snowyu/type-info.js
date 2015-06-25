@@ -49,11 +49,11 @@ more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 
 ### v0.8.0
 
-+ [Type] $attributes to hold the type's attributes.
-+ the type's attributes definition in attribute folder.
++ [Type] $attributes to hold the type's meta attributes.
+  + the type's meta attributes definition in the src/attributes directory.
 + [ObjectType] add AttributeType to defineAttribute
-* [ObjectType] cache the type of attribute
-+ [Type] isSame to compare parametric object
+* [ObjectType] use the primitive type of attribute if possible.
++ [Type] isSame method to compare parametric object
 - remove the parent attribute
 - remove the encoding from type-info
   - remove `Type::encode` method
