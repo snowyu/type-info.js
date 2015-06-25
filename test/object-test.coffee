@@ -133,6 +133,15 @@ describe "ObjectType", ->
       n = object.create({a:12})
       n.should.have.property 'a', 12
       n.should.be.instanceOf ObjectValue
+    it "should create a object value on strict mode", ->
+      # this object has only 'a' attribute.
+      # so the 'b' attribute is ignored when checkValidity is false.
+      t = object.cloneType strict:true, attributes:
+        a:"string"
+      n = t.create {a: '13', b: 3}, checkValidity: false
+      n.should.have.property 'a', '13'
+      n.should.not.have.property 'b'
+      n.should.be.instanceOf ObjectValue
     it "should not create a value (invalid object)", ->
       assert.throw object.create.bind(object, 1234)
   describe ".assign()", ->

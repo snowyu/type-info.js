@@ -14,16 +14,12 @@ setImmediate    = setImmediate || process.nextTick
 register        = TypeInfo.register
 
 class TestType
-  register TestType
-
   constructor: ->return super
   $attributes: Attributes
     min:
       type: 'Number'
     max:
       type: 'Number'
-    required:
-      type: 'Boolean'
   initialize: (aOptions)->
     super(aOptions)
     if aOptions
@@ -32,17 +28,22 @@ class TestType
 
 
 describe "TypeInfo", ->
-    it "should get type info object directly", ->
-      t = TestType(min: undefined)
-      should.exist t
-      t.should.be.equal TypeInfo('Test')
-      t.should.have.property 'name', 'Test'
-    it "should create type info object directly", ->
-      t = TestType min:2
-      should.exist t
-      t.should.be.not.equal TypeInfo('Test')
-      t.should.have.property 'min', 2
-      t.should.have.property 'name', 'Test'
+  before ->
+    result = register TestType
+    result.should.be.true
+  after ->
+    TypeInfo.unregister 'Test'
+  it "should get type info object directly", ->
+    t = TestType(min: undefined)
+    should.exist t
+    t.should.be.equal TypeInfo('Test')
+    t.should.have.property 'name', 'Test'
+  it "should create type info object directly", ->
+    t = TestType min:2
+    should.exist t
+    t.should.be.not.equal TypeInfo('Test')
+    t.should.have.property 'min', 2
+    t.should.have.property 'name', 'Test'
   describe ".pathArray()", ->
     it "should get default type path array", ->
       t = TypeInfo('Test')

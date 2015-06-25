@@ -44,20 +44,21 @@ describe "StringType", ->
       result = JSON.parse result
       result.should.be.equal "asd"
   describe ".createValue()/.create()", ->
+    str = string.clone()
     it "should create a value", ->
-      s = string.create("123")
+      s = str.create("123")
       assert.equal String(s), "123"
     it "should not create a value (exceed length limits)", ->
-      string.initialize max:3, min:2
-      assert.throw string.create.bind(string, "1234")
+      str.initialize max:3, min:2
+      assert.throw str.create.bind(str, "1234")
     it "should throw error when value not string type", ->
-      should.throw string.create.bind(string, 1), "is an invalid"
+      should.throw str.create.bind(str, 1), "is an invalid"
     it "should throw error when string length < min", ->
-      string.initialize min: 2
-      should.throw string.create.bind(string, '1'), "is an invalid"
+      str.initialize min: 2
+      should.throw str.create.bind(str, '1'), "is an invalid"
     it "should throw error when string length > max", ->
-      string.initialize max: 3
-      should.throw string.create.bind(string, 'sd123'), "is an invalid"
+      str.initialize max: 3
+      should.throw str.create.bind(str, 'sd123'), "is an invalid"
   describe ".assign()", ->
     it "should assign a value", ->
       n = string.create('12')
