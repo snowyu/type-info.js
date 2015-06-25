@@ -2,6 +2,7 @@ createObject    = require 'inherits-ex/lib/createObject'
 extend          = require 'util-ex/lib/extend'
 isFloat         = require 'util-ex/lib/is/string/float'
 isInt           = require 'util-ex/lib/is/string/int'
+isEmptyObject   = require 'util-ex/lib/is/empty-object'
 isObject        = require 'util-ex/lib/is/type/object'
 isNumber        = require 'util-ex/lib/is/type/number'
 isString        = require 'util-ex/lib/is/type/string'
@@ -72,13 +73,11 @@ class ObjectType
         type: 'string'
   ###
   defineAttributes: (aAttributes)->
-    for k,v of aAttributes
-      continue if not k? or not v?
-      @defineAttribute k, v
-    return
-  _initialize: (aOptions)->
-    #defineProperty @, 'attributes', {}
-    @attributes = {}
+    if not isEmptyObject(aAttributes) #avoid to recusive
+      @attributes = {}
+      for k,v of aAttributes
+        continue if not k? or not v?
+        @defineAttribute k, v
     return
   _toObject:(aOptions)->
     result = super(aOptions)
@@ -89,20 +88,6 @@ class ObjectType
       delete t.fullName
       vAttrs[k] = t[TYPE] if getObjectKeys(t).length is 1
     result
-  _assign: (aOptions)->
-    if aOptions
-      #@defineAttributes(aOptions.attributes) if aOptions.attributes
-      # strict mode: the attribute is only allowed in the options.attributes.
-      @strict = !!aOptions.strict if aOptions.strict
-    return
-  ###
-  _encode: (aValue, aOptions)->
-    JSON.stringify(aValue)
-  _decode: (aString, aOptions)->
-    try result = JSON.parse aString
-    result
-  _isEncoded: (aValue)->isString(aValue)
-  ###
   _decodeValue: (aValue)->
     if isString aValue
       try result = JSON.parse aValue
@@ -117,14 +102,12 @@ class ObjectType
     if result
       if aOptions and aOptions.attributes
         for vName, vType of aOptions.attributes
-          #console.log '    ', vName, '"', aValue[vName], '"',vType.type.toString()
           if not vType.validate aValue[vName], false
             l = vType.errors.length
             if l
               for i in [0...l]
                 e = vType.errors[i]
                 vName = vType.name
-                #console.log vName, e.name, e.message
                 unless e.name[0] is '[' or vName is e.name
                   vName += '.' + e.name
                 @errors.push name: vName, message: e.message
