@@ -9,6 +9,7 @@ isUndefined     = require('util-ex/lib/is/type/undefined')
 extend          = require('util-ex/lib/extend')
 defineProperty  = require('util-ex/lib/defineProperty')
 createObject    = require('inherits-ex/lib/createObject')
+Attributes      = require('./attributes/abstract-type')
 attributes      = createObject require('./attributes/type')
 #try Codec       = require('buffer-codec')
 
@@ -42,7 +43,7 @@ class Value
       return createObject aType.ValueType, aValue, aType, aOptions
     defineProperty @, '$type', aType
     @_initialize(aValue, aType, aOptions)
-    @assign(aValue)
+    @assign(aValue, aOptions)
   isValid: ()->@$type.isValid(@valueOf())
   _initialize: (aValue, aType, aOptions)->
     defineProperty @, 'value', null
@@ -100,6 +101,8 @@ class Value
 module.exports = class Type
   factory Type
 
+  Attributes::Type = Type
+
   @ROOT_NAME: 'type'
   # export the Value Class from here
   @Value: Value
@@ -107,33 +110,6 @@ module.exports = class Type
   ValueType: Value
   $attributes: attributes
 
-  ###
-  @JSON_ENCODING:
-    name: 'json'
-    encode: JSON.stringify
-    decode: JSON.parse
-  @DEFAULT_ENCODING: @JSON_ENCODING
-  getEncoding: (encoding)-> #depreacted
-    if !encoding or encoding is Type.DEFAULT_ENCODING.name
-      if @parent
-        return @parent.getEncoding()
-      else
-        return Type.DEFAULT_ENCODING
-    if isString encoding
-      if Codec
-        encoding = Codec encoding
-      else
-        throw new TypeError '
-          Should install buffer-codec package first
-          to enable encoding name supports.
-        '
-    if !isFunction(encoding.encode) or
-       !isFunction(encoding.decode) or !encoding.name
-      throw new TypeError '
-        encoding should have name property, encode and decode functions.
-      '
-    encoding
-  ###
   constructor: (aTypeName, aOptions)->
     # create a new instance object if aOptions is not the original options of the type.
     if not (this instanceof Type) and not (aTypeName instanceof Type)
@@ -164,7 +140,7 @@ module.exports = class Type
     defineProperty @, 'errors', null
     @$attributes.initializeTo @ if @$attributes
     @_initialize aOptions if @_initialize
-    @assign(aOptions)
+    @assign(aOptions) if aOptions?
   finalize: (aOptions)->
     @errors = null if @errors
     #@encoding = null if @encoding
@@ -189,23 +165,25 @@ module.exports = class Type
     aOptions = {} unless isObject aOptions
 
     if isString aExclude
-      aExclude = getObjectKeys(aOptions).concat aExclude
-    else if isArray aExclude
-      aExclude = aExclude.concat getObjectKeys(aOptions)
-    else
-      aExclude = getObjectKeys(aOptions)
-    aExclude.push 'name'
+      aExclude = [aExclude]
+    else if not isArray aExclude
+      aExclude = []
 
     if @$attributes
-      @$attributes.assignTo(@, aOptions, aExclude, aSerialized)
-      #aOptions.encoding = @encoding unless aOptions.encoding
+      for k,v of @$attributes.names
+        continue if v in aExclude or aOptions.hasOwnProperty(v)
+        continue if k is 'name'
+        value = @[v]
+        vDefaultValue = @$attributes[k].value
+        continue if aSerialized and (k[0] is '$' or value is undefined or value is vDefaultValue)
+        value = vDefaultValue if value is undefined
+        aOptions[v] = value
     else
       extend aOptions, @, (key, value)->
         result = not aOptions.hasOwnProperty(key) and not (key in aExclude)
         if aSerialized
           result = result and key[0] isnt '$' and value isnt undefined
         result
-    #delete aOptions.name
     aOptions
   _validate: (aValue, aOptions)->true
   error: (aMessage, aOptions)->
@@ -239,13 +217,6 @@ module.exports = class Type
   isSame: (aOptions)->
     #deepEqual @, aOptions
     for k,v of @mergeOptions()
-      continue if k is 'name'
-      ###
-      if k is 'encoding'
-        if (v.name isnt Type.DEFAULT_ENCODING.name) or aOptions[k]?
-          return false unless aOptions[k].name is v.name
-        continue
-      ###
       return false unless deepEqual aOptions[k], v
     return true
 
@@ -261,7 +232,6 @@ module.exports = class Type
         vType = @createType aOptions
     else
       vType = @
-    #Value(aValue, vType, aOptions)
     createObject vType.ValueType, aValue, vType, aOptions
   create: @::createValue
   createType: (aOptions)->
