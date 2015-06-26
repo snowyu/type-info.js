@@ -30,7 +30,11 @@ Just we need to understand the basic concepts of the following.
 
 ## Quick starts
 
-0. Type = require('type-info')
+0. npm install type-info
+
+    ```coffee
+    Type = require('type-info')
+    ```
 1. get the type
 
     ```coffee
