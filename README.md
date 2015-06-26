@@ -32,20 +32,24 @@ Just we need to understand the basic concepts of the following.
 
 0. Type = require('type-info')
 1. get the type
+
     ```coffee
     TNumber = Type('Number')
     ```
 2. create the virtual type
+
     ```coffee
     TPositiveNumber =
       Type('Number', {min:0, cached: 'PositiveNumber'})
     ```
 3. validate a value
+
     ```coffee
     assert.notOk TPositiveNumber.isValid(-1)
     assert.ok TPositiveNumber.isValid(1)
     ```
 3. create the value
+
     ```coffee
     n = TPositiveNumber.create(123)
     assert.ok n.isValid()
