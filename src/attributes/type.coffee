@@ -1,5 +1,5 @@
 inherits        = require 'inherits-ex/lib/inherits'
-Attributes      = require './abstract-type'
+Attributes      = require './abstract-attributes'
 
 module.exports = class TypeAttributes
 

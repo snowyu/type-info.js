@@ -157,7 +157,7 @@ We can draw the two concepts related to the type, from here:
 
 The abstract type and value class and are in the src/type-info.coffee file.
 the defined attributes of the abstract type is in the src/attributes/type.coffee file.
-the abstract attributes class is in the src/attributes/abstract-type.coffee file.
+the abstract attributes class is in the src/attributes/abstract-attributes.coffee file.
 
 #### The Type Class
 
