@@ -54,7 +54,28 @@ Just we need to understand the basic concepts of the following.
     n = TPositiveNumber.create(123)
     assert.ok n.isValid()
     assert.equal Number(n) + 3, 126
+    bool = Type('Boolean').create(true)
+    assert.equal Number(bool), 1
     ```
+
+### Known Types:
+
+* String Type
+  * `min`: the minimum string length
+  * `max`: the maximum string length
+* Number Type
+  * `min`: the minimum number
+  * `max`: the maximum number
+* Boolean Type
+  * It is a special number type. you can cast to number.
+  * 0 means false, 1 means true.
+  * `boolNames`: the boolean value string names.
+    * defaults to {true:['true', 'yes'], false: ['false,'no']}
+    * enumerable: false
+* Function Type
+  * `scope`:
+* Object Type
+  * `attributes`: the object attribute list.
 
 ## Cache the Virtual Types
 
