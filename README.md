@@ -4,7 +4,12 @@
 [![downloads](https://img.shields.io/npm/dm/type-info.svg)](https://npmjs.org/package/type-info)
 [![license](https://img.shields.io/npm/l/type-info.svg)](https://npmjs.org/package/type-info)
 
-The mini Run-time Type Infomation.
+The mini run-time type information can be streamable via using toObject() method
+to generate the parametric type object, or using JSON.stringify directly.
+It can also be used to validate the value of the type.
+
+Creating the new type is very simple and easy through this framework.
+Just we need to understand the basic concepts of the following.
 
 ## Concepts
 
@@ -14,7 +19,38 @@ The mini Run-time Type Infomation.
   * It's a object of a primitive type.
   * It can not be registered.
   * It could be unlimited number of virtual types.
+* Type Attributes: first determine(define) these attributes of the type, before creating a new type.
+  All types have the `name` and `required` attributes.
+  * `name` *(string)*: the type name.
+    * required   = true:  it must be required.
+    * enumerable = false: it can not be enumerable.
+  * `required` *(boolean)*: the attribute whether is required(must be exists, not optional).
+* Value: the value with corresponding to the type information.
 
+
+## Quick starts
+
+0. Type = require('type-info')
+1. get the type
+```coffee
+TNumber = Type('Number')
+```
+2. create the virtual type
+```coffee
+TPositiveNumber =
+  Type('Number', {min:0, cached: 'PositiveNumber'})
+```
+3. validate a value
+```coffee
+assert.notOk TPositiveNumber.isValid(-1)
+assert.ok TPositiveNumber.isValid(1)
+```
+3. create the value
+```coffee
+n = TPositiveNumber.create(123)
+assert.ok n.isValid()
+assert.equal Number(n) + 3, 126
+```
 
 ## Cache the Virtual Types
 
@@ -197,7 +233,7 @@ module.exports = class NumberAttributes
     if dest.min? and dest.max? and dest.max < dest.min
       throw new TypeError('max should be equal or greater than min')
     result
-    
+
 ```
 
 the Number type:
@@ -254,9 +290,11 @@ class NumberType
 ### User
 
 * Type(aTypeName, aOptions)
-  * get the type info object from glabal cache.
+  * get the type info object from glabal cache if aOptions is null
+    or the same as the original/default attributes value.
+  * else create a new virtual type info object.
 * type.createType(aObject) (Type::createType)
-  * create a new type info object instance.
+  * create a new type info object instance always.
   * the aObject.name should be exists as the type name.
 
 
