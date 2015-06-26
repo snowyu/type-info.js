@@ -174,8 +174,13 @@ module.exports = class Type
         continue if v in aExclude or aOptions.hasOwnProperty(v)
         continue if k is 'name'
         value = @[v]
-        vDefaultValue = @$attributes[k].value
-        continue if aSerialized and (k[0] is '$' or value is undefined or value is vDefaultValue)
+        vAttr = @$attributes[k]
+        vDefaultValue = vAttr.value
+        continue if aSerialized and
+           (k[0] is '$' or
+            vAttr.enumerable is false or
+            value is undefined or
+            value is vDefaultValue)
         value = vDefaultValue if value is undefined
         aOptions[v] = value
     else

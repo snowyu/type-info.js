@@ -147,6 +147,9 @@ descripe the attributes of a type. an attribute includes these properties:
 
 * `name` *(string)*: the attribute name.
 * `type` *(string)*: the attribute type.
+* `enumerable` *(boolean)*: the attribute whether is a hidden attribute, defaults to true.
+  * the hidden attribute can not export to the parametric object(serialized).
+  * note: It's a hidden attribute too if attribute name begins with '$' char.
 * `required` *(boolean)*: the attribute whether it's required(MUST HAVE).
 * `value`: the default value of the attribute.
 * `assign(dest, src, value, key)` *(function)*: optional special function to assign the attribute's `value`

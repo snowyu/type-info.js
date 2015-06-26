@@ -6,7 +6,7 @@ expect          = chai.expect
 assert          = chai.assert
 chai.use(sinonChai)
 
-TypeInfo        = require '../index'
+TypeInfo        = require '../src/type-info'
 Attributes      = require '../src/attributes/'
 setImmediate    = setImmediate || process.nextTick
 register        = TypeInfo.register
@@ -16,6 +16,10 @@ class TestType
   constructor: ->return super
   $attributes: attrs = Attributes
     haha: 'Boolean'
+    hidden:
+      type: 'Number'
+      enumerable: false
+      value: 5
     min:
       name: 'min'
       type: 'Number'
@@ -90,11 +94,16 @@ describe "TypeAttributes", ->
     result.should.be.deep.equal
       name:
         name: 'name'
+        "enumerable": false
         "required": true
         "type": "String"
       required:
         "name": "required"
         "type": "Boolean"
+      hidden:
+        type: 'Number'
+        enumerable: false
+        value: 5
       haha:
         type: 'Boolean'
       min:
@@ -105,3 +114,16 @@ describe "TypeAttributes", ->
         type:
           name: 'Number'
           max: 3
+  it.only "should not export hidden attributes", ->
+    t = TestType min:-1, hidden: 34, max:3
+    should.exist t
+    t.should.be.not.equal TypeInfo('Test')
+    t.should.have.property 'min', -1
+    t.should.have.property 'hidden', 34
+    t.should.have.property 'max', 3
+    t.should.have.property 'name', 'Test'
+    t.toObject().should.be.deep.equal
+      "name": "Test"
+      "fullName": "/type/Test"
+      min: -1
+      max: 3

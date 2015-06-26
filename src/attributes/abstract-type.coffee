@@ -36,7 +36,10 @@ module.exports = class AbstractTypeAttributes
   initializeTo: (dest)->
     for k,v of @names
       continue if k is 'name'
-      value = @[k].value
+      vAttr = @[k]
+      value = vAttr.value
+      if vAttr.enumerable is false and not dest.hasOwnProperty(v)
+        defineProperty dest, v, value
       dest[v] = value unless value is undefined
   assignTo: (src, dest, aExclude)->
     vNames = @names

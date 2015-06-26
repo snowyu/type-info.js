@@ -9,6 +9,7 @@ module.exports = class TypeAttributes
     name:
       name: 'name'
       required: true
+      enumerable: false
       type: 'String'
     required:
       name: 'required'
