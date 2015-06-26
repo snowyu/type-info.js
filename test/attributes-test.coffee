@@ -7,7 +7,7 @@ assert          = chai.assert
 chai.use(sinonChai)
 
 TypeInfo        = require '../src/type-info'
-Attributes      = require '../src/attributes/'
+Attributes      = require '../src/attributes/type'
 setImmediate    = setImmediate || process.nextTick
 register        = TypeInfo.register
 attrs = null

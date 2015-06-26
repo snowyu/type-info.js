@@ -6,4 +6,4 @@
       name: 'required'
       type: 'Boolean'
 ###
-module.exports = require './type'
+module.exports = require './abstract-attributes'
