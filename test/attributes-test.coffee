@@ -10,11 +10,14 @@ TypeInfo        = require '../index'
 Attributes      = require '../src/attributes/'
 setImmediate    = setImmediate || process.nextTick
 register        = TypeInfo.register
+attrs = null
 
 class TestType
   constructor: ->return super
-  $attributes: Attributes
+  $attributes: attrs = Attributes
+    haha: 'Boolean'
     min:
+      name: 'min'
       type: 'Number'
       value: 1
     max:
@@ -28,6 +31,7 @@ describe "TypeAttributes", ->
     result.should.be.true
   after ->
     TypeInfo.unregister 'Test'
+
   it "should get type info object directly", ->
     t = TestType()
     should.exist t
@@ -53,3 +57,51 @@ describe "TypeAttributes", ->
     t.should.have.property 'min', 1
     t.should.have.property 'max', 2
     t.should.have.property 'name', 'Test'
+  it "should change the type attributes name", ->
+    attrs.initialize
+      min:
+        name: '最小'
+    t = attrs.min.value
+    should.exist t
+    t.should.be.equal 1
+    t = attrs.min.type
+    should.exist t
+    t.should.be.equal 'Number'
+    t = TestType '最小':2
+    should.exist t
+    t.should.be.not.equal TypeInfo('Test')
+    t.should.have.property '最小', 2
+    t.should.not.have.property 'max'
+    t.should.have.property 'name', 'Test'
+    t = TestType 'min':6
+    should.exist t
+    t.should.be.not.equal TypeInfo('Test')
+    t.should.have.property '最小', 6
+    t.should.not.have.property 'max'
+    t.should.have.property 'name', 'Test'
+    # restore the old name
+    attrs.initialize
+      min:
+        name: 'min'
+  it "should get proper $attributes", ->
+    result = {}
+    for k, v of attrs
+      result[k] = v if attrs.hasOwnProperty k
+    result.should.be.deep.equal
+      name:
+        name: 'name'
+        "required": true
+        "type": "String"
+      required:
+        "name": "required"
+        "type": "Boolean"
+      haha:
+        type: 'Boolean'
+      min:
+        name: 'min'
+        type: 'Number'
+        value: 1
+      max:
+        type:
+          name: 'Number'
+          max: 3
