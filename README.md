@@ -87,11 +87,12 @@ more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 The type has a name and can verify whether a value belongs to that type.
 We can draw the two concepts related to the type, from here:
 
-* Attributes: the attributes(meta data) of this type.
+* Attributes: the attributes(meta data) of this type(see the src/attributes/ directory).
 * Value: the value of this type.
 
 The abstract type and value class and are in the src/type-info.coffee file.
-the defined attributes of the abstract type in in the src/attributes/type.coffee file.
+the defined attributes of the abstract type is in the src/attributes/type.coffee file.
+the abstract attributes class is in the src/attributes/abstract-type.coffee file.
 
 #### The Type Class
 
@@ -148,8 +149,8 @@ descripe the attributes of a type. an attribute includes these properties:
 * `type` *(string)*: the attribute type.
 * `required` *(boolean)*: the attribute whether it's required(MUST HAVE).
 * `value`: the default value of the attribute.
-* `assign(dest, src, key)` *(function)*: optional special function to assign
-  the attribute's value from src[key] to dest[key].
+* `assign(dest, src, value, key)` *(function)*: optional special function to assign the attribute's `value`
+  from src[`key`] to dest[`key`].
   * src, dest: the type object or the parametric type object.
 
 The Attributes class have the following properties and methods:
