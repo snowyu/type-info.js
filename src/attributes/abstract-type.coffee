@@ -14,8 +14,13 @@ getObjectKeys   = Object.keys
 ###
 module.exports = class AbstractTypeAttributes
   merge: (attrs)->
-    for k,v of attrs
-      @[k] = v
+    for name, attr of attrs
+      attr = type:attr if isString attr
+      vAttr = @[name]
+      if vAttr is undefined
+        @[name] = attr
+      else
+        vAttr[k] = v for k, v of attr
     return
   _initialize: (aOptions)-> @merge(aOptions)
   initialize: (aOptions)->
@@ -43,16 +48,16 @@ module.exports = class AbstractTypeAttributes
       continue if v in aExclude
       #continue if aSerialized and (k[0] is '$')
       vAttr = @[k]
+      vValue = src[v] || src[k]
       if k is 'name'
-        vName = src[v] || src.name
-        dest.name = vName if vName and vName isnt dest.name
-      else if src[v] isnt undefined
-        if @Type and vAttr.type? and src[v]? and src[v] isnt vAttr.value
+        dest.name = vValue if vValue and vValue isnt dest.name
+      else if vValue isnt undefined
+        if @Type and vAttr.type? and vValue? and vValue isnt vAttr.value
           vType = @Type vAttr.type
-          if vType and not vType.isValid src[v]
+          if vType and not vType.isValid vValue
             k = "assign attribute '#{v}' error"
             if vType.errors.length
-              k += ": the value #{src[v]}"
+              k += ": the value #{vValue}"
               for v in vType.errors
                 k += "\n #{v.name}: #{v.message}"
               dest.errors = vType.errors if dest.errors
@@ -60,8 +65,8 @@ module.exports = class AbstractTypeAttributes
         # aSerialized and src[v] isnt vAttr.value:
         #  the parametric type object(options) do not need the defaults value.
         # but the mergeOptions need all attriubtes!!
-        if !isFunction(vAttr.assign) or !vAttr.assign(dest, src, v)
-          dest[v] = src[v]
+        if !isFunction(vAttr.assign) or !vAttr.assign(dest, src, vValue, v)
+          dest[v] = vValue
     return dest
   isOriginal: (aObject)->
     result = true
