@@ -80,8 +80,8 @@ describe "BooleanType", ->
       t.validate('true').should.be.equal true
       t.validate(1).should.be.equal true
     it "should validate an encoded value via added to strBool array", ->
-      t.strBool[0].push '否'
-      t.strBool[1].push '是'
+      t.boolNames[false].push '否'
+      t.boolNames[true].push '是'
       t.validate('是').should.be.equal true
       t.validate('否').should.be.equal true
       n = t.createValue(false)

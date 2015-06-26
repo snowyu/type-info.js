@@ -1,11 +1,12 @@
-extend    = require 'util-ex/lib/extend'
-isFloat   = require 'util-ex/lib/is/string/float'
-isInt     = require 'util-ex/lib/is/string/int'
-isNumber  = require 'util-ex/lib/is/type/number'
-isString  = require 'util-ex/lib/is/type/string'
-isBoolean = require 'util-ex/lib/is/type/boolean'
+extend          = require 'util-ex/lib/extend'
+isFloat         = require 'util-ex/lib/is/string/float'
+isInt           = require 'util-ex/lib/is/string/int'
+isNumber        = require 'util-ex/lib/is/type/number'
+isString        = require 'util-ex/lib/is/type/string'
+isBoolean       = require 'util-ex/lib/is/type/boolean'
+Attributes      = require './attributes/type'
 
-module.exports = Type = require './type-info'
+module.exports  = Type = require './type-info'
 
 
 register  = Type.register
@@ -15,10 +16,13 @@ class BooleanType
   register BooleanType
   aliases BooleanType, 'boolean', 'bool'
 
-  strBool: [
-    ['false', 'no']
-    ['true', 'yes']
-  ]
+  $attributes: Attributes
+    boolNames:
+      type: 'Object'
+      enumerable: false
+      value:
+        false: ['false', 'no']
+        true:  ['true', 'yes']
   _initialize: (aOptions)->
   _assign: (aOptions)->
   _encodeValue: (aValue)->
@@ -26,9 +30,9 @@ class BooleanType
   _decodeValue: (aString)->
     if isString(aString) and aString.length
       aString = aString.toLowerCase()
-      if aString in @strBool[0]
+      if aString in @boolNames[false]
         false
-      else if aString in @strBool[1]
+      else if aString in @boolNames[true]
         true
       else
         null
