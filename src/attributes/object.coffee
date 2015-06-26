@@ -7,9 +7,9 @@ module.exports = class ObjectAttributes
   @attrs: attrs =
     attributes:
       type: 'Object'
-      assign: (dest, src, key)->
+      assign: (dest, src, value, key)->
         if dest.defineAttributes
-          dest.defineAttributes(src[key])
+          dest.defineAttributes(value)
           true
         else
           false
