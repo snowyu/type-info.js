@@ -16,6 +16,7 @@ class TestType
   constructor: ->return super
   $attributes: attrs = Attributes
     haha: 'Boolean'
+    $hidden: 'Number'
     hidden:
       type: 'Number'
       enumerable: false
@@ -100,6 +101,8 @@ describe "TypeAttributes", ->
       required:
         "name": "required"
         "type": "Boolean"
+      $hidden:
+        type: 'Number'
       hidden:
         type: 'Number'
         enumerable: false
@@ -114,12 +117,13 @@ describe "TypeAttributes", ->
         type:
           name: 'Number'
           max: 3
-  it.only "should not export hidden attributes", ->
-    t = TestType min:-1, hidden: 34, max:3
+  it "should not export hidden attributes", ->
+    t = TestType min:-1, hidden: 34, max:3, $hidden:122
     should.exist t
     t.should.be.not.equal TypeInfo('Test')
     t.should.have.property 'min', -1
     t.should.have.property 'hidden', 34
+    t.should.have.property '$hidden', 122
     t.should.have.property 'max', 3
     t.should.have.property 'name', 'Test'
     t.toObject().should.be.deep.equal
