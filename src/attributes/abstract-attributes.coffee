@@ -3,6 +3,7 @@ isArray         = require 'util-ex/lib/is/type/array'
 isFunction      = require 'util-ex/lib/is/type/function'
 defineProperty  = require 'util-ex/lib/defineProperty'
 getObjectKeys   = Object.keys
+getOwnPropertyNames = Object.getOwnPropertyNames
 
 ###
   Usage 1:
@@ -13,15 +14,16 @@ getObjectKeys   = Object.keys
       type: 'Boolean'
 ###
 module.exports = class AbstractTypeAttributes
-  merge: (attrs)->
+  merge: (attrs)->@mergeTo attrs, @
+  mergeTo: (attrs, dest)->
     for name, attr of attrs
       attr = type:attr if isString attr
-      vAttr = @[name]
+      vAttr = dest[name]
       if vAttr is undefined
-        @[name] = attr
+        dest[name] = attr
       else
         vAttr[k] = v for k, v of attr
-    return
+    return dest
   _initialize: (aOptions)-> @merge(aOptions)
   initialize: (aOptions)->
     @_initialize(aOptions)
@@ -49,7 +51,6 @@ module.exports = class AbstractTypeAttributes
       aExclude = []
     for k, v of vNames
       continue if v in aExclude
-      #continue if aSerialized and (k[0] is '$')
       vAttr = @[k]
       vValue = src[v] || src[k]
       if k is 'name'
@@ -65,23 +66,27 @@ module.exports = class AbstractTypeAttributes
                 k += "\n #{v.name}: #{v.message}"
               dest.errors = vType.errors if dest.errors
             throw new TypeError k
-        # aSerialized and src[v] isnt vAttr.value:
-        #  the parametric type object(options) do not need the defaults value.
-        # but the mergeOptions need all attriubtes!!
-        if !isFunction(vAttr.assign) or !vAttr.assign(dest, src, vValue, v)
-          dest[v] = vValue
+        if !isFunction(vAttr.assign) or !vAttr.assign(dest, src, vValue, k)
+          dest[k] = vValue
     return dest
+  toObject: ->
+    result = {}
+    for k,v of @names
+      result[v.name || k] = v
+    result
   isOriginal: (aObject)->
     result = true
     for k,v of @names
       continue if k is 'name'
-      unless aObject[v] is @[k].value
+      value = aObject[k] or aObject[v]
+      #continue unless aObject.hasOwnProperty(k) or aObject.hasOwnProperty(v)
+      unless value is undefined or value is @[k].value
         result = false
         break
     result
   getNames: ->
     result = {}
-    for k in getObjectKeys @
+    for k in getOwnPropertyNames @
       v = @[k]
       result[k] = v.name || k
     result
