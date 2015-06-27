@@ -68,7 +68,7 @@ class AttributeType
   #getName: -> @[NAME]
   toString: -> '[Attribute ' + @name + ']'
   _toObject: (aOptions)->
-    result = super(aOptions)
+    result = super
     vType = @[TYPE].toObject(aOptions)
     result[TYPE] = vType[NAME]
     delete vType[NAME]

@@ -49,7 +49,7 @@ class FunctionType
     else
       aValue
   _toObject: (aOptions)->
-    result = super aOptions
+    result = super
     vScope = result.scope
     vGlobal = @$globalScope
     if isObject(vScope) and isObject vGlobal
