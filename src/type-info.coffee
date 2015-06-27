@@ -111,12 +111,13 @@ module.exports = class Type
   $attributes: attributes
 
   constructor: (aTypeName, aOptions)->
-    # create a new instance object if aOptions is not the original options of the type.
+    # create a new instance object if aOptions is not the original
+    # options of the type.
     if not (this instanceof Type) and not (aTypeName instanceof Type)
       if aTypeName
         if isObject aTypeName
           aOptions = aTypeName
-          aTypeName = aOptions.name || aOptions[NAME]
+          aTypeName = aOptions.name || aOptions[attributes.name.name]
         else if not isString aTypeName
           aOptions = aTypeName
           aTypeName = undefined
@@ -133,7 +134,8 @@ module.exports = class Type
           aTypeName = Type.getNameFromClass(aTypeName) if aTypeName
         return unless aTypeName
       vTypeClass = Type.registeredClass aTypeName
-      if vTypeClass and aOptions and not vTypeClass::$attributes.isOriginal(aOptions)
+      if vTypeClass and aOptions and
+         not vTypeClass::$attributes.isOriginal(aOptions)
         return createObject vTypeClass, aOptions
     return super
   initialize: (aOptions)->
@@ -161,20 +163,22 @@ module.exports = class Type
     @_assign aOptions if @_assign
     @
   # merge self to options(do not modify the original options)
-  mergeOptions: (aOptions, aExclude, aSerialized)->
-    aOptions = {} unless isObject aOptions
+  mergeTo: (aObject, aExclude, aSerialized, aNameRequired)->
+    aObject = {} unless isObject aObject
 
     if isString aExclude
       aExclude = [aExclude]
     else if not isArray aExclude
       aExclude = []
 
-    if @$attributes
-      for k,v of @$attributes.names
-        continue if v in aExclude or aOptions.hasOwnProperty(v)
+    vAttributes = @$attributes
+    if vAttributes
+      for k,v of vAttributes.names
+        continue if k in aExclude or aObject.hasOwnProperty(v)
+        continue if v in aExclude
         continue if k is 'name'
-        value = @[v]
-        vAttr = @$attributes[k]
+        value = @[k]
+        vAttr = vAttributes[k]
         vDefaultValue = vAttr.value
         continue if aSerialized and
            (k[0] is '$' or
@@ -182,14 +186,19 @@ module.exports = class Type
             value is undefined or
             value is vDefaultValue)
         value = vDefaultValue if value is undefined
-        aOptions[v] = value
+        v = k unless aSerialized
+        aObject[v] = value
+      if aNameRequired
+        k = if aSerialized then vAttributes.names.name else 'name'
+        aObject[k] = @name
     else
-      extend aOptions, @, (key, value)->
-        result = not aOptions.hasOwnProperty(key) and not (key in aExclude)
+      extend aObject, @, (key, value)->
+        result = not aObject.hasOwnProperty(key) and not (key in aExclude)
         if aSerialized
           result = result and key[0] isnt '$' and value isnt undefined
         result
-    aOptions
+      aObject.name = @name if aNameRequired
+    aObject
   _validate: (aValue, aOptions)->true
   error: (aMessage, aOptions)->
     name = (aOptions && (aOptions[NAME] || aOptions.name)) || String(@)
@@ -207,7 +216,7 @@ module.exports = class Type
     if isObject raiseError
       aOptions    = raiseError
       raiseError  = aOptions.raiseError
-    aOptions = @mergeOptions(aOptions)
+    aOptions = @mergeTo(aOptions)
     aOptions.raiseError = true if raiseError
     result = @validateRequired aValue, aOptions
     result = @_validate(aValue, aOptions) if result and aValue?
@@ -221,13 +230,13 @@ module.exports = class Type
   #   skip some properties, custom filter.
   isSame: (aOptions)->
     #deepEqual @, aOptions
-    for k,v of @mergeOptions()
+    for k,v of @mergeTo()
       return false unless deepEqual aOptions[k], v
     return true
 
   createValue: (aValue, aOptions)->
     if aOptions and not @isSame(aOptions)
-      aOptions = @mergeOptions(aOptions)
+      aOptions = @mergeTo(aOptions)
       # TODO: seperate the cache-able ability
       if isFunction Type.getCacheItem
         # this Type Factory is cache-able.
@@ -244,12 +253,13 @@ module.exports = class Type
     result = createObject @Class, aOptions
     result
   cloneType: (aOptions)->
-    aOptions = @mergeOptions(aOptions, null, true)
+    aOptions = @mergeTo(aOptions, null, true)
     aOptions.name = @name unless aOptions.name
     @createType aOptions
   clone: @::cloneType
   # Get(create) a global Type class or create new Value from the json string.
-  # it will create a new type object if options is not the original type options.
+  # it will create a new type object if options is not the original type
+  # options.
   @fromJson: (aString)->
     #aString = JSON.parse aString
     Type.from JSON.parse(aString)
@@ -259,15 +269,17 @@ module.exports = class Type
 
   ###
   encode: (aOptions)->
-    aOptions = @mergeOptions(aOptions, null, true)
+    aOptions = @mergeTo(aOptions, null, true)
     aOptions.encoding.encode @toObject(aOptions)
   decode: (aEncoded, aOptions) ->
     aOptions = aOptions.encoding.decode aEncoded
-    aOptions = @mergeOptions(aOptions)
+    aOptions = @mergeTo(aOptions)
   ###
 
-  # Get(create) a global Type class or create new Value from the parametric type object.
-  # it will create a new type object if options is not the original(default) type options.
+  # Get(create) a global Type class or create new Value from the parametric
+  # type object.
+  # it will create a new type object if options is not the original(default)
+  # type options.
   @from: (aObject) ->
     result = Type aObject
     if aObject.value? and result
@@ -287,9 +299,7 @@ module.exports = class Type
     result = JSON.stringify result
     result
   _toObject:(aOptions)->
-    result = @mergeOptions aOptions, null, true
-    result[NAME] = @name
-    result.fullName = @path()
+    result = @mergeTo aOptions, null, true, true
     ###
     vEncoding = result.encoding
     if vEncoding and vEncoding.name isnt Type.DEFAULT_ENCODING.name
