@@ -47,12 +47,13 @@ class AttributeType
       if vType
         if not (vType instanceof Type)
           vType = Type(vType)
-          throw TypeError("no such type registered:"+aOptions[TYPE]) unless vType
+          unless vType
+            throw TypeError("no such type registered:"+aOptions[TYPE])
           vType = vType.clone(aOptions) unless vType.isSame(aOptions)
           @[TYPE] = vType
       else
         @[TYPE] = AttributeType.defaultType
-        
+
     return
   ###
   getFullName: ->
@@ -71,8 +72,8 @@ class AttributeType
     vType = @[TYPE].toObject(aOptions)
     result[TYPE] = vType[NAME]
     delete vType[NAME]
-    delete vType.fullName
-    if not @[TYPE].hasOwnProperty NAME
+    # if it's a customize type(special options type):
+    if not @[TYPE].hasOwnProperty 'name'
       for k,v of vType
         result[k] = v
     result
