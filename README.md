@@ -20,6 +20,7 @@ Just we need to understand the basic concepts of the following.
   * It can not be registered.
   * It could be unlimited number of virtual types.
 * Type Attributes: first determine(define) these attributes of the type, before creating a new type.
+  It's used to constrain the Type.
   All types have the `name` and `required` attributes.
   * `name` *(string)*: the type name.
     * required   = true:  it must be required.
@@ -77,9 +78,11 @@ Just we need to understand the basic concepts of the following.
     * defaults to {true:['true', 'yes'], false: ['false,'no']}
     * enumerable: false
 * Function Type
-  * `scope`:
+  * `scope`: the set of variables this function can access to.
 * Object Type
   * `attributes`: the object attribute list.
+    * It's used to constrain the value of the object.
+* Class Type: a special object type. the value of class is the constructor of this class.
 
 ## Cache the Virtual Types
 
@@ -208,9 +211,11 @@ These methods could be overridden:
 
 #### The Attributes class
 
-descripe the attributes of a type. an attribute includes these properties:
+describe the attributes of a type. an attribute includes these properties:
 
-* `name` *(string)*: the attribute name.
+* `name` *(string)*: the attribute name. you can specify a non-english name.
+  * the english name(the attributes' key) is used in the internal of the type.
+  * the `name` only used on export(`toObject`) or import(`assign`).
 * `type` *(string)*: the attribute type.
 * `enumerable` *(boolean)*: the attribute whether is a hidden attribute, defaults to true.
   * the hidden attribute can not export to the parametric object(serialized).
@@ -469,15 +474,16 @@ __return__
 
 * *(object)*: the created value object instance.
 
-#### toObject(options)
+#### toObject(aObject, aNameRequired = true)
 
-convert the type info to an parametric type object. It could be streamable your type.
+convert the type info into aObject(an parametric type object). It could be streamable your type.
 
 __arguments__
 
 * `options` *(object)*: optional options
   * `value` *(Type)*: optional value, when value exists, the following options used:
   * `typeOnly` *(boolean)*: just type info if true. defaults to false.
+* `aNameRequired` *(boolean)*: write the name to aObject. defaults to true.
 
 __return__
 
