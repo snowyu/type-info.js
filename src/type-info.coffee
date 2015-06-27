@@ -298,8 +298,8 @@ module.exports = class Type
     result = @toObject(aOptions)
     result = JSON.stringify result
     result
-  _toObject:(aOptions)->
-    result = @mergeTo aOptions, null, true, true
+  _toObject:(aOptions, aNameRequired = true)->
+    result = @mergeTo aOptions, null, true, aNameRequired
     ###
     vEncoding = result.encoding
     if vEncoding and vEncoding.name isnt Type.DEFAULT_ENCODING.name
@@ -308,11 +308,11 @@ module.exports = class Type
       delete result.encoding
     ###
     result
-  toObject: (aOptions)->
+  toObject: (aOptions, aNameRequired)->
     if aOptions
       if not aOptions.typeOnly and not isUndefined aOptions.value
         value = aOptions.value
       delete aOptions.typeOnly
-    result = @_toObject(aOptions)
+    result = @_toObject(aOptions, aNameRequired)
     result.value = value unless isUndefined value
     result
