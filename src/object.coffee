@@ -8,7 +8,7 @@ isNumber        = require 'util-ex/lib/is/type/number'
 isString        = require 'util-ex/lib/is/type/string'
 defineProperty  = require 'util-ex/lib/defineProperty'
 inheritsObject  = require 'inherits-ex/lib/inheritsObject'
-createObject    = require("inherits-ex/lib/createObject")
+createObject    = require 'inherits-ex/lib/createObject'
 ObjectValue     = require './value/object'
 attributes      = createObject require './attributes/object'
 module.exports  = Type = require './attribute'
@@ -40,8 +40,10 @@ class ObjectType
       type: ...
   ###
   defineAttribute: (aName, aOptions)->
-    throw TypeError('defineAttribute has no attribute name') unless aName and aName.length
-    throw TypeError('the attribute "' + aName + '" has already defined.') if @attributes[aName]?
+    unless aName and aName.length
+      throw TypeError('defineAttribute has no attribute name')
+    if @attributes[aName]?
+      throw TypeError('the attribute "' + aName + '" has already defined.')
     if isString aOptions
       vType = Type(aOptions)
       throw TypeError("no such type registered:"+aOptions) unless vType
@@ -79,13 +81,12 @@ class ObjectType
         continue if not k? or not v?
         @defineAttribute k, v
     return
-  _toObject:(aOptions)->
-    result = super(aOptions)
+  _toObject:(aOptions, aNameRequired)->
+    result = super
     result.attributes = vAttrs = {}
     for k,v of @attributes
-      vAttrs[k] = t = v.toObject(aOptions)
-      delete t[NAME]
-      delete t.fullName
+      vAttrs[k] = t = v.toObject(aOptions, false)
+      #delete t[NAME]
       vAttrs[k] = t[TYPE] if getObjectKeys(t).length is 1
     result
   _decodeValue: (aValue)->
@@ -136,3 +137,34 @@ class ObjectType
       else
         defineProperty aObjectValue, '$type', @
     aObjectValue
+  attrKeys: ->
+    result = []
+    for k,v of @attributes
+      result.push v.name || k if v.enumerable isnt false
+    result
+  attrOwnPropertyNames: ->
+    result = []
+    for k,v of @attributes
+      result.push v.name
+    result
+  # Returns
+  #   all own, enumerable properties of an object
+  # Parameters
+  #   * aObject: The object whose enumerable own properties are to be returned.
+  keys: (aObject)->
+    result = getObjectKeys aObject
+    if @strict
+      vAttrKeys = @attrKeys()
+      result = result.filter (element)->element in vAttrKeys
+    result
+  # Returns
+  #   all own properties of an object, enumerable or not.
+  # Parameters
+  #   * aObject: The object whose enumerable and non-enumerable own properties
+  #     are to be returned.
+  getOwnPropertyNames: (aObject)->
+    result = getOwnPropertyNames aObject
+    if @strict
+      vAttrKeys = @attrOwnPropertyNames()
+      result = result.filter (element)->element in vAttrKeys
+    result
