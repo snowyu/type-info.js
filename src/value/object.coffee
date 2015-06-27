@@ -1,8 +1,9 @@
-inherits    = require 'inherits-ex/lib/inherits'
-extend      = require 'util-ex/lib/extend'
-isString    = require 'util-ex/lib/is/type/string'
-Attributes  = require '../attributes/object'
-Value       = require './'
+inherits        = require 'inherits-ex/lib/inherits'
+extend          = require 'util-ex/lib/extend'
+isString        = require 'util-ex/lib/is/type/string'
+defineProperty  = require 'util-ex/lib/defineProperty'
+Attributes      = require '../attributes/object'
+Value           = require './'
 
 getOwnPropertyNames = Object.getOwnPropertyNames
 getObjectKeys = Object.keys
@@ -11,6 +12,12 @@ STRICT = Attributes.attrs.strict.name || 'strict'
 
 module.exports = class ObjectValue
   inherits ObjectValue, Value
+  _initialize: (aValue, aType, aOptions)->
+    for k, attr of @$type.attributes
+      continue if k[0] is '$'
+      vName = attr.name || k
+      attr = extend {enumerable: true}, attr
+      defineProperty @, vName, undefined, attr
   _assign:(aValue)->
     #if isString aValue
     #  aValue = JSON.parse aValue
