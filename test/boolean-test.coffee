@@ -21,7 +21,6 @@ describe "BooleanType", ->
       result = result.toObject()
       result.should.be.deep.equal
         "name":"Boolean"
-        "fullName":"/type/Boolean"
   describe "value.toObject()", ->
     it "should get value info to obj", ->
       result = bool.createType()
@@ -34,7 +33,6 @@ describe "BooleanType", ->
       result = result.toObjectInfo()
       result.should.be.deep.equal
         "name":"Boolean"
-        "fullName":"/type/Boolean"
         value: false
   describe ".toString()", ->
     it "should get type name if no value", ->
@@ -50,7 +48,6 @@ describe "BooleanType", ->
       result = JSON.parse result
       result.should.be.deep.equal
         "name":"Boolean"
-        "fullName":"/type/Boolean"
     it "should get value info to obj", ->
       result = bool.create(true)
       Number(result).should.be.equal 1

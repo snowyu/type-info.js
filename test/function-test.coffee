@@ -29,7 +29,6 @@ describe "FunctionType", ->
       result.should.be.deep.equal
         "scope":{"A":12,"B":15,"log":"log"}
         "name":"Function"
-        "fullName":"/type/Function"
     it "should get value and type info to obj", ->
       f = ->
       v = func.createValue(f)
@@ -37,7 +36,6 @@ describe "FunctionType", ->
       result.should.be.deep.equal
         "scope":{"A":12,"B":15,"log":"log"}
         name:"Function"
-        fullName:"/type/Function"
         value:v
   describe ".toJson()", ->
     it "should get type info via json string", ->
@@ -46,14 +44,12 @@ describe "FunctionType", ->
       result.should.be.deep.equal
         "scope":{"A":12,"B":15,"log":"log"}
         name:"Function"
-        fullName:"/type/Function"
     it "should get type info via JSON.stringify", ->
       result = JSON.stringify func
       result = JSON.parse result
       result.should.be.deep.equal
         "scope":{"A":12,"B":15,"log":"log"}
         name:"Function"
-        fullName:"/type/Function"
     it "should get value info via json string", ->
       f = -> log('hi my f')
       v = func.createValue(f)
@@ -62,7 +58,6 @@ describe "FunctionType", ->
       result.should.be.deep.equal
         "scope":{"A":12,"B":15,"log":"log"}
         name:"Function"
-        fullName:"/type/Function"
         value: "function () {\n          return log('hi my f');\n        }"
   describe ".createValue()/.create()", ->
     it "should create a value", ->

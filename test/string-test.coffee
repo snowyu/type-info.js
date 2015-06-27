@@ -23,7 +23,6 @@ describe "StringType", ->
         max:3
         min:2
         name:"String"
-        fullName:"/type/String"
     it "should get value info to obj", ->
       result = string.create("asd")
       result = result.toObject()
@@ -37,7 +36,6 @@ describe "StringType", ->
         max:3
         min:2
         name:"String"
-        fullName:"/type/String"
     it "should get value info via json string", ->
       result = string.create("asd")
       result = result.toJson()

@@ -62,6 +62,14 @@ describe "TypeAttributes", ->
     t.should.have.property 'min', 1
     t.should.have.property 'max', 2
     t.should.have.property 'name', 'Test'
+  it "should customize the name attribute", ->
+    TestType::$attributes.name.name = '名'
+    #Attributes.attrs.name.name = '名'
+    t = TypeInfo '名': 'Test'
+    should.exist t
+    t.should.be.equal TypeInfo('Test')
+    # restore the old name
+    Attributes.attrs.name.name = 'name'
   it "should change the type attributes name", ->
     attrs.initialize
       min:
@@ -75,15 +83,18 @@ describe "TypeAttributes", ->
     t = TestType '最小':2
     should.exist t
     t.should.be.not.equal TypeInfo('Test')
-    t.should.have.property '最小', 2
+    t.should.have.property 'min', 2
     t.should.not.have.property 'max'
     t.should.have.property 'name', 'Test'
     t = TestType 'min':6
     should.exist t
     t.should.be.not.equal TypeInfo('Test')
-    t.should.have.property '最小', 6
+    t.should.have.property 'min', 6
     t.should.not.have.property 'max'
     t.should.have.property 'name', 'Test'
+    t.toObject().should.deep.equal
+      name: 'Test'
+      '最小': 6
     # restore the old name
     attrs.initialize
       min:
@@ -128,6 +139,5 @@ describe "TypeAttributes", ->
     t.should.have.property 'name', 'Test'
     t.toObject().should.be.deep.equal
       "name": "Test"
-      "fullName": "/type/Test"
       min: -1
       max: 3

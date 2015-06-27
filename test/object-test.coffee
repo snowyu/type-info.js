@@ -35,9 +35,8 @@ describe "ObjectType", ->
       result.should.be.deep.equal
         "attributes": {}
         "name":"Object"
-        "fullName":"/type/Object"
     it "should get type info to obj with simple attributes", ->
-      attrs = 
+      attrs =
         a:"string"
         d:
           type: "object"
@@ -47,7 +46,6 @@ describe "ObjectType", ->
       result = t.toObject()
       result.should.be.deep.equal
         name: 'Object'
-        fullName: '/type/Object'
         attributes:
           a: "String"
           d:
@@ -55,7 +53,7 @@ describe "ObjectType", ->
             attributes:
               d1: "Number"
     it "should get type info to obj with attributes", ->
-      attrs = 
+      attrs =
         a:"string"
         b:
           type:"number"
@@ -79,7 +77,6 @@ describe "ObjectType", ->
       result = t.toObject()
       result.should.be.deep.equal
         name: 'Object'
-        fullName: '/type/Object'
         attributes:
           a: "String"
           b:
@@ -122,7 +119,6 @@ describe "ObjectType", ->
       result.should.be.deep.equal
         "attributes": {}
         "name":"Object"
-        "fullName":"/type/Object"
     it "should get value info to obj", ->
       result = object.create a:13
       result = result.toJson()
@@ -144,6 +140,19 @@ describe "ObjectType", ->
       n.should.be.instanceOf ObjectValue
     it "should not create a value (invalid object)", ->
       assert.throw object.create.bind(object, 1234)
+    it "should create a value with non-enumerable attribute", ->
+      t = object.cloneType attributes:
+        a:
+          type:"string"
+          enumerable: false
+        b: 'Number'
+      n = t.create {a: '13', b: 3}
+      result = Object.keys(n) # get own and enumerable properties
+      result.should.be.deep.equal ['b']
+      result = Object.getOwnPropertyNames(n) # get all own properties
+      # filter other non-enumerable hidden properties.
+      result = result.filter (element)-> element[0] isnt '$'
+      result.should.be.deep.equal ['a','b']
   describe ".assign()", ->
     it "should assign a value", ->
       n = object.createValue({})

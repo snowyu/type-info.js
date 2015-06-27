@@ -27,7 +27,6 @@ describe "NumberType", ->
         "max":34
         "min":5
         "name":"Number"
-        "fullName":"/type/Number"
   describe "value.toObject()", ->
     it "should get value info to obj", ->
       result = number.createType
@@ -42,7 +41,6 @@ describe "NumberType", ->
       result = result.toObjectInfo()
       result.should.be.deep.equal
         "name":"Number"
-        "fullName":"/type/Number"
         value: 13
   describe ".toString()", ->
     it "should get type name if no value", ->
@@ -60,7 +58,6 @@ describe "NumberType", ->
         "max":34
         "min":5
         "name":"Number"
-        "fullName":"/type/Number"
     it "should get value info to obj", ->
       result = number.create(13)
       Number(result).should.be.equal 13
