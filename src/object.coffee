@@ -137,6 +137,7 @@ class ObjectType
       else
         defineProperty aObjectValue, '$type', @
     aObjectValue
+  #TODO: maybe should use Attributes class and put this method into it.
   attrKeys: ->
     result = []
     for k,v of @attributes
