@@ -1,8 +1,21 @@
-## type-info [![npm](https://img.shields.io/npm/v/type-info.svg)](https://npmjs.org/package/type-info)
+## type-info [![npm][npm-svg]][npm]
 
-[![Build Status](https://img.shields.io/travis/snowyu/type-info.js/master.svg)](http://travis-ci.org/snowyu/type-info.js)
-[![downloads](https://img.shields.io/npm/dm/type-info.svg)](https://npmjs.org/package/type-info)
-[![license](https://img.shields.io/npm/l/type-info.svg)](https://npmjs.org/package/type-info)
+[![Build Status][travis-svg]][travis]
+[![Code Climate][codeclimate-svg]][codeclimate]
+[![Test Coverage][codeclimate-test-svg]][codeclimate-test]
+[![downloads][npm-download-svg]][npm]
+[![license][npm-license-svg]][npm]
+
+[npm]: https://npmjs.org/package/type-info
+[npm-svg]: https://img.shields.io/npm/v/type-info.svg
+[npm-download-svg]: https://img.shields.io/npm/dm/type-info.svg
+[npm-license-svg]: https://img.shields.io/npm/l/type-info.svg
+[travis-svg]: https://img.shields.io/travis/snowyu/type-info.js/master.svg
+[travis]: http://travis-ci.org/snowyu/type-info.js
+[codeclimate-svg]: https://codeclimate.com/github/snowyu/type-info.js/badges/gpa.svg
+[codeclimate]: https://codeclimate.com/github/snowyu/type-info.js
+[codeclimate-test-svg]: https://codeclimate.com/github/snowyu/type-info.js/badges/coverage.svg
+[codeclimate-test]: https://codeclimate.com/github/snowyu/type-info.js/coverage
 
 The mini run-time type information can be streamable via using toObject() method
 to generate the parametric type object, or using JSON.stringify directly.
