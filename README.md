@@ -236,7 +236,6 @@ The Attributes class have the following properties and methods:
   * `merge(attributes)`: merge the attributes into itself.
   * `assignTo(src, dest, aExclude)`: assign attributes value from the src to dest.
     * aExclude *(array)*: do not include these attributes to copy.
-  * `getNames()`: return the attribute name list(array).
 
 
 #### Example
