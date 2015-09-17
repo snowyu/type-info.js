@@ -300,13 +300,6 @@ module.exports = class Type
     result
   _toObject:(aOptions, aNameRequired = true)->
     result = @mergeTo aOptions, null, true, aNameRequired
-    ###
-    vEncoding = result.encoding
-    if vEncoding and vEncoding.name isnt Type.DEFAULT_ENCODING.name
-      result.encoding = vEncoding.name
-    else
-      delete result.encoding
-    ###
     result
   toObject: (aOptions, aNameRequired)->
     if aOptions
