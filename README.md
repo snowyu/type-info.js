@@ -46,56 +46,60 @@ Just we need to understand the basic concepts of the following.
 
 0. npm install type-info
 
-    ```coffee
-    Type = require('type-info')
+    ```js
+    var Type = require('type-info')
     ```
 1. get the type
 
-    ```coffee
-    TNumber = Type('Number')
+    ```js
+    var TNumber = Type('Number')
     ```
 2. create the virtual type
 
-    ```coffee
-    TPositiveNumber =
+    ```js
+    var TPositiveNumber =
       Type('Number', {min:0, cached: 'PositiveNumber'})
     ```
 3. validate a value
 
-    ```coffee
-    assert.notOk TPositiveNumber.isValid(-1)
-    assert.ok TPositiveNumber.isValid(1)
+    ```js
+    assert.notOk(TPositiveNumber.isValid(-1))
+    assert.ok(TPositiveNumber.isValid(1))
     ```
 3. create the value
 
-    ```coffee
-    n = TPositiveNumber.create(123)
-    assert.ok n.isValid()
-    assert.equal Number(n) + 3, 126
-    bool = Type('Boolean').create(true)
-    assert.equal Number(bool), 1
+    ```js
+    var n = TPositiveNumber.create(123)
+    assert.ok(n.isValid())
+    assert.equal(Number(n) + 3, 126)
+    var bool = Type('Boolean').create(true)
+    assert.equal(Number(bool), 1)
     ```
 
 ### Known Types:
 
-* String Type
+* [String Type][string-type]
   * `min`: the minimum string length
   * `max`: the maximum string length
-* Number Type
+* [Number Type][number-type]
   * `min`: the minimum number
   * `max`: the maximum number
-* Boolean Type
+  * Integer Type
+* [Boolean Type][boolean-type]
   * It is a special number type. you can cast to number.
   * 0 means false, 1 means true.
   * `boolNames`: the boolean value string names.
     * defaults to {true:['true', 'yes'], false: ['false,'no']}
     * enumerable: false
-* Function Type
-  * `scope`: the set of variables this function can access to.
-* Object Type
+* [Function Type][function-type]
+  * `globalScope`: the set of variables this function can access to.
+  * `global`: the set of local functions this function can access to.
+    It can not be exported.
+* [Object Type][object-type]
   * `attributes`: the object attribute list.
     * It's used to constrain the value of the object.
-* Class Type: a special object type. the value of class is the constructor of this class.
+* [Class Type][class-type]: a special object type. the value of class is the constructor of this class.
+  * TODO: not fined.
 
 ## Cache the Virtual Types
 
@@ -127,6 +131,10 @@ more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 
 ## Changes
 
+### v1.0.0
+
+* use the [abstract-type][abstract-type] package.
+* The pacakge just collects types only.
 
 ### v0.8.0
 
@@ -163,186 +171,7 @@ more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 
 ## Usage
 
-### Develop a new Type:
-
-The type has a name and can verify whether a value belongs to that type.
-We can draw the two concepts related to the type, from here:
-
-* Attributes: the attributes(meta data) of this type(see the src/attributes/ directory).
-* Value: the value of this type.
-
-The abstract type and value class and are in the src/type-info.coffee file.
-the defined attributes of the abstract type is in the src/attributes/type.coffee file.
-the abstract attributes class is in the src/attributes/abstract-attributes.coffee file.
-
-#### The Type Class
-
-* Properties:
-  * $attributes *(object)*: the attributes of this type.
-
-* Methods
-  * `encode(aOptions)`: encode type info.
-  * `decode(aEncoded, aOptions)`: decode to a type info object.
-
-These methods should be overridden:
-
-* `_initialize(aOptions)`: initialize the type object.
-* `_assign(options)`: assign an options of type to itself.
-* `_validate(aValue, aOptions)`: validate a value whether is valid.
-* `_encodeValue(value)`: (optional) encode the value, it's used to convert to json.
-* `_decodeValue(value)`: (optional) decode the value, it's used to convert from json and assign from value.
-* `ValueType` property: (optional) defaults to `Value` Class. unless implement your own value class.
-
-
-#### The Value Class
-
-* Properties:
-  * `value`: store the value here.
-  * `$type` *(Type)*: the type of this value.
-* Static/Class Methods:
-  * `tryGetTypeName(Value)`: guess the type name of the value.
-  * `constructor(value[, type[, options]])`: create a value instance.
-    * `value`: the assigned value. it will guess the type of the value if no type provided.
-    * `type` *(Type)*: the type of the value
-    * `options` *(object)*: the optional type of value options. it will create a new type if exists.
-* Methods:
-  * `clone()`: clone this value object.
-  * `assign(value, options)`: assign the value.
-    * `aOptions` *(object)*:
-      * `checkValidity` *(boolean)*: defaults to true.
-  * `fromJson(json)`: assign a value from json string.
-  * `createFromJson(json)`: create a new value object from json string.
-  * `isValid()`: whether the value is valid.
-  * `toObject(aOptions)`: return a parametric object of the value. it wont include type info.
-  * `toObjectInfo(aOptions)`: return a parametric object of the value. it will include type info.
-
-These methods could be overridden:
-
-  * `_toObject(aOptions)`: return the parametric object of this value. the derived class could override this.
-  * `valueOf()`: return the value. the derived class could override this.
-  * `_assign(value)`: assign the value to itself.  the derived class could override this.
-
-#### The Attributes class
-
-describe the attributes of a type. an attribute includes these properties:
-
-* `name` *(string)*: the attribute name. you can specify a non-english name.
-  * the english name(the attributes' key) is used in the internal of the type.
-  * the `name` only used on export(`toObject`) or import(`assign`).
-* `type` *(string)*: the attribute type.
-* `enumerable` *(boolean)*: the attribute whether is a hidden attribute, defaults to true.
-  * the hidden attribute can not export to the parametric object(serialized).
-  * note: It's a hidden attribute too if attribute name begins with '$' char.
-* `required` *(boolean)*: the attribute whether it's required(MUST HAVE).
-* `value`: the default value of the attribute.
-* `assign(dest, src, value, key)` *(function)*: optional special function to assign the attribute's `value`
-  from src[`key`] to dest[`key`].
-  * src, dest: the type object or the parametric type object.
-
-The Attributes class have the following properties and methods:
-
-* Properties
-  * names: the attribute name list to cache from attributes.
-
-* Methods:
-  * `_initialize(aOptions)`: the aOptions is addtional attributes if any.
-  * `merge(attributes)`: merge the attributes into itself.
-  * `assignTo(src, dest, aExclude)`: assign attributes value from the src to dest.
-    * aExclude *(array)*: do not include these attributes to copy.
-
-
-#### Example
-
-the Number type's meta attributes:
-
-```coffee
-inherits        = require 'inherits-ex/lib/inherits'
-Attributes      = require './type'
-
-module.exports = class NumberAttributes
-  inherits NumberAttributes, Attributes
-
-  @attrs: attrs =
-    min:
-      name: 'min'
-      type: 'Number'
-    max:
-      name: 'max'
-      type: 'Number'
-
-  _initialize: (aOptions)->
-    super(aOptions)
-    @merge(attrs)
-    return
-  assignTo: (src, dest, aExclude, aSerialized)->
-    result = super
-    if dest.min? and dest.max? and dest.max < dest.min
-      throw new TypeError('max should be equal or greater than min')
-    result
-
-```
-
-the Number type:
-
-```coffee
-
-createObject    = require 'inherits-ex/lib/createObject'
-extend          = require 'util-ex/lib/extend'
-isFloat         = require 'util-ex/lib/is/string/float'
-isInt           = require 'util-ex/lib/is/string/int'
-isNumber        = require 'util-ex/lib/is/type/number'
-isString        = require 'util-ex/lib/is/type/string'
-attributes      = createObject require './attribute/number'
-module.exports  = Type = require './type-info'
-
-
-register  = Type.register
-aliases   = Type.aliases
-
-class NumberType
-  register NumberType
-  aliases NumberType, 'number'
-
-  $attributes: attributes
-
-  _encodeValue: (aValue)->
-    aValue = String(aValue)
-  _decodeValue: (aString)->
-    if isInt aString
-      aString = parseInt(aString)
-    else if isFloat aString
-      aString = parseFloat(aString)
-    else
-      aString = undefined
-    aString
-  _validate: (aValue, aOptions)->
-    aValue = @_decodeValue(aValue) if isString aValue
-    result = isNumber aValue
-    if result
-      if aOptions
-        vMin = aOptions.min
-        vMax = aOptions.max
-        if vMin?
-          result = aValue >= vMin
-          if not result
-            @error "should be equal or greater than minimum value: " + vMin
-        if result and vMax?
-          result = aValue <= vMax
-          if not result
-            @error "should be equal or less than maximum value: " + vMax
-    result
-
-```
-### User
-
-* Type(aTypeName, aOptions)
-  * get the type info object from glabal cache if aOptions is null
-    or the same as the original/default attributes value.
-  * else create a new virtual type info object.
-* type.createType(aObject) (Type::createType)
-  * create a new type info object instance always.
-  * the aObject.name should be exists as the type name.
-
+See [abstract-type][abstract-type].
 
 ```coffee
 Type  = require 'type-info'
@@ -383,264 +212,17 @@ number.assign min:3, max:10
 ## API
 
 
-### Type = require('type-info')
-
-the type info class.
-
-#### constructor(typeName, options)
-
-get a global type info instance object.
-
-__arguments__
-
-* `typeName` *(string)*: the type name.
-* `options` *(object)*: optional type options to apply. different types have different options.
-  * `parent` *(TypeInfo)*: it should be an attribute if the `parent` exists
-  * `required` *(boolean)*: this type is required.
-
-__return__
-
-* *(object)*: the type object instance from global cache.
-
-#### Type.create(typeName, options)
-
-This class method is used to create a new Type instance object.
-
-__arguments__
-
-* `typeName` *(string)*: the type name.
-* `options` *(object)*: optional type options. different types have different options.
-
-__return__
-
-* *(object)*: the created type object instance.
-
-#### Type.createFrom(aObject)
-
-create a type object or value object from a parametric type object.
-
-__arguments__
-
-* `aObject` *(object)*: the encoding string should be decoded to an object.
-  * `name` *(string)*: the type name required.
-  * `value` : the optional value. return value object if exists.
-
-__return__
-
-* *(object)*:
-  * the created type object instance with the type info if no value in it.
-  * the created value object instance if value in it.
-
-#### Type.createFromJson(json)
-
-create a type object or value object from a json string.
-
-__arguments__
-
-* `json` *(string)*: the json string with type info.
-  * `name` *(string)*: the type name required.
-  * `value` : the optional value. return value object if exists.
-
-__return__
-
-* *(object)*:
-  * the created type object instance with the type info if no value in it.
-  * the created value object instance if value in it.
-
-#### cloneType()
-
-clone the type object.
-
-* alias: clone
-
-__return__
-
-* *(object)*: the created type object instance with same type info.
-
-#### createType(options)
-
-create a new the type object of this type with the type options.
-
-__arguments__
-
-* `options` *(object)*: optional type options. different types have different options.
-  * it is the same as `cloneType()` if no options
-
-__return__
-
-* *(object)*: the created type object instance with the type info options.
-
-#### createValue(value, options)
-
-* alias: create
-
-create a value from the type.
-
-__arguments__
-
-* `value` *(Type)*: the value of this type to create
-* `options` *(object)*: optional type options
-  * the new virtual type of the value will be created if exists
-
-__return__
-
-* *(object)*: the created value object instance.
-
-#### toObject(aObject, aNameRequired = true)
-
-convert the type info into aObject(an parametric type object). It could be streamable your type.
-
-__arguments__
-
-* `options` *(object)*: optional options
-  * `value` *(Type)*: optional value, when value exists, the following options used:
-  * `typeOnly` *(boolean)*: just type info if true. defaults to false.
-* `aNameRequired` *(boolean)*: write the name to aObject. defaults to true.
-
-__return__
-
-* *(object)*: the created object with type info.
-
-#### toJson(options)
-
-convert the type info to a json string. It could be streamable your type.
-It is almost equivalent to JSON.stringify(theTypeObject).
-
-__arguments__
-
-* `options` *(object)*: optional options
-  * `value` *(Type)*: optional value, when value exists, the following options used:
-  * `typeOnly` *(boolean)*: just type info if true. defaults to false.
-
-__return__
-
-* *(string)*: the json string with type info.
-
-#### validate(value, raiseError, options)
-
-validate a specified value whether is valid.
-
-__arguments__
-
-* `value` *(Type)*: the value to validate
-* `raiseError` *(boolean)*:  whether throw error if validate failed. defaults to true.
-* `options` *(object)*: optional type options to override. defaults to this type options.
-
-__return__
-
-* *(boolean)*: whether is valid if no raise error.
-
-
-### Value = require('type-info').Value
-
-the value class.
-
-#### constructor(value[[, type], options])
-
-__arguments__
-
-* `value` *(Type)*: the value to be created.
-  * it will guess the type if no type object.
-* `type` *(Object)*: the optional type object.
-* `options` *(object)*: optional type options.
-  * checkValidity *(boolean)*: whether check the value is valid. defaults to true.
-
-__return__
-
-* *(object)*: the created value object instance.
-
-#### property $type
-
-point to a type object. It can not be enumerable.
-
-#### clone()
-
-clone the value object.
-
-__return__
-
-* *(object)*: the created new value object instance with same as original info.
-
-#### create(value, options)
-
-create a new the value object.
-
-__arguments__
-
-* `value` *(Type)*: the value to be created. MUST BE the same type.
-* `options` *(object)*: optional type options.
-  * checkValidity *(boolean)*: whether check the value is valid. defaults to true.
-
-__return__
-
-* *(object)*: the created value object instance.
-
-#### assign(value, options)
-
-assign a value to itself.
-
-__arguments__
-
-* `value` *(Type)*: the value to be assigned. MUST BE the same type.
-* `options` *(object)*: optional type options.
-  * checkValidity *(boolean)*: whether check the value is valid. defaults to true.
-
-__return__
-
-* *(object)*: `this` object.
-
-#### isValid()
-
-validate the value whether is valid.
-
-__return__
-
-* *(boolean)*: whether the value is valid.
-
-#### toObject(options)
-
-convert the value to an object. It wont include type info. It could be streamable your value.
-
-__arguments__
-
-* `options` *(object)*: optional options
-
-__return__
-
-* *(object)*: the created object with value and type info.
-
-```coffee
-Type  = require 'type-info'
-Value = Type.Value
-
-val = Value({a:1}, Type 'Object')
-
-assert.deepEqual toObject(), {a:1}
-
-```
-
-#### toJson(options)
-
-convert the value to a json string. It wont include type info. It could be streamable your value.
-
-__arguments__
-
-* `options` *(object)*: optional options
-
-__return__
-
-* *(string)*: the valu of the json string.
-
-
-### ObjectType
-
-The Object type can hold the attributes of the object.
-
-* Object Type Attributes:
-  * `attributes` *(object)*: this object's attribute list.
-  * `strict` *(boolean)*: whether treat this object as strict mode. defaults to false.
-    * the object can only have attributes in the attributes list if strict mode is enabled.
+See [abstract-type][abstract-type].
 
 ## License
 
 MIT
+
+
+[abstract-type]: https://github.com/snowyu/abstract-type.js
+[string-type]: https://github.com/snowyu/string-type.js
+[number-type]: https://github.com/snowyu/number-type.js
+[boolean-type]: https://github.com/snowyu/boolean-type.js
+[object-type]: https://github.com/snowyu/object-type.js
+[function-type]: https://github.com/snowyu/function-type.js
+[class-type]: https://github.com/snowyu/class-type.js
