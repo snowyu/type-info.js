@@ -24,10 +24,14 @@
     "klass"
   ],
   "dependencies": {
-    "custom-factory": "~1.5.0",
-    "deep-equal": "^1.0.0",
-    "inherits-ex": "~1.1.4",
-    "util-ex": "~0.3.14"
+    "abstract-type": "^0.3.3",
+    "boolean-type": "^0.1.0",
+    "function-type": "^0.1.0",
+    "inherits-ex": "^1.1.4",
+    "number-type": "^0.2.0",
+    "object-type": "0.0.2",
+    "string-type": "^0.1.1",
+    "util-ex": "^0.3.15"
   },
   "devDependencies": {
     "chai": "~1.10.0",
