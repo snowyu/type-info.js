@@ -25,13 +25,13 @@
     "klass"
   ],
   "dependencies": {
-    "abstract-type": "^0.3.3",
-    "boolean-type": "^0.1.0",
-    "function-type": "^0.1.0",
+    "abstract-type": "^0.4.2",
+    "boolean-type": "^0.1.1",
+    "function-type": "^0.1.1",
     "inherits-ex": "^1.1.4",
-    "number-type": "^0.2.0",
-    "object-type": "0.0.2",
-    "string-type": "^0.1.1",
+    "number-type": "^0.2.1",
+    "object-type": "0.0.3",
+    "string-type": "^0.1.2",
     "util-ex": "^0.3.15"
   },
   "devDependencies": {
