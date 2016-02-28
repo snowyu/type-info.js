@@ -17,7 +17,7 @@
 [codeclimate-test-svg]: https://codeclimate.com/github/snowyu/type-info.js/badges/coverage.svg
 [codeclimate-test]: https://codeclimate.com/github/snowyu/type-info.js/coverage
 
-The mini run-time type information can be streamable via using toObject() method
+This run-time type information can be streamable via using toObject() method
 to generate the parametric type object, or using JSON.stringify directly.
 It can also be used to validate the value of the type.
 
@@ -85,6 +85,10 @@ Just we need to understand the basic concepts of the following.
   * `min`: the minimum number
   * `max`: the maximum number
   * Integer Type
+  * Float Type
+* [Date Type][date-type]
+  * `min`: the minimum date to limit
+  * `max`: the maximum date to limit
 * [Boolean Type][boolean-type]
   * It is a special number type. you can cast to number.
   * 0 means false, 1 means true.
@@ -226,3 +230,4 @@ MIT
 [object-type]: https://github.com/snowyu/object-type.js
 [function-type]: https://github.com/snowyu/function-type.js
 [class-type]: https://github.com/snowyu/class-type.js
+[date-type]: https://github.com/snowyu/date-type.js

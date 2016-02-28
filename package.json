@@ -32,6 +32,7 @@
     "number-type": "^0.2.1",
     "object-type": "0.0.3",
     "string-type": "^0.1.2",
+    "date-type": "^0.1.2",
     "util-ex": "^0.3.15"
   },
   "devDependencies": {
