@@ -26,13 +26,14 @@
   ],
   "dependencies": {
     "abstract-type": "^0.4.2",
+    "array-type": "^0.1.0",
     "boolean-type": "^0.1.1",
+    "date-type": "^0.1.2",
     "function-type": "^0.1.1",
     "inherits-ex": "^1.1.4",
     "number-type": "^0.2.1",
     "object-type": "0.0.3",
     "string-type": "^0.1.2",
-    "date-type": "^0.1.2",
     "util-ex": "^0.3.15"
   },
   "devDependencies": {

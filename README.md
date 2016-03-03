@@ -99,6 +99,10 @@ Just we need to understand the basic concepts of the following.
   * `globalScope`: the set of variables this function can access to.
   * `global`: the set of local functions this function can access to.
     It can not be exported.
+* [Array Type][array-type]
+  * `min`: the minimum array length to limit
+  * `max`: the maximum array length to limit
+  * `of`:  the each elment's type of the array to limit.
 * [Object Type][object-type]
   * `attributes`: the object attribute list.
     * It's used to constrain the value of the object.

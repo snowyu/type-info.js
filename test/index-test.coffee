@@ -17,6 +17,7 @@ allTypes = [
   'Function'
   'Boolean'
   'Date'
+  'Array'
 ]
 
 describe 'TypeInfo', ->
