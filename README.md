@@ -26,6 +26,7 @@ Just we need to understand the basic concepts of the following.
 
 ## Concepts
 
+* Type Factory: collects all type info classes and objects.
 * Primitive Types
   * All registered types are primitive types.
 * Virtual Types
@@ -47,18 +48,18 @@ Just we need to understand the basic concepts of the following.
 0. npm install type-info
 
     ```js
-    var Type = require('type-info')
+    var TypeFactory = require('type-info')
     ```
-1. get the type
+1. get the type object
 
     ```js
-    var TNumber = Type('Number')
+    var TNumber = TypeFactory('Number')
     ```
 2. create the virtual type
 
     ```js
     var TPositiveNumber =
-      Type('Number', {min:0, cached: 'PositiveNumber'})
+      TypeFactory('Number', {min:0, cached: 'PositiveNumber'})
     ```
 3. validate a value
 
@@ -72,7 +73,7 @@ Just we need to understand the basic concepts of the following.
     var n = TPositiveNumber.create(123)
     assert.ok(n.isValid())
     assert.equal(Number(n) + 3, 126)
-    var bool = Type('Boolean').create(true)
+    var bool = TypeFactory('Boolean').create(true)
     assert.equal(Number(bool), 1)
     ```
 
@@ -117,19 +118,19 @@ Install cache-factory first.
 
 
 ```coffee
-Type = require 'type-info'
+TypeFactory = require 'type-info'
 cacheable = require 'cache-factory'
 
-# apply the cache-able ability to Type
-cacheable Type
+# apply the cache-able ability to TypeFactory
+cacheable TypeFactory
 
 # now cache the virtual types with name.
-passwordType = Type 'String', min:6, cached: {name: 'Password'}
+passwordType = TypeFactory 'String', min:6, cached: {name: 'Password'}
 # or no named it:
-passwordType1 = Type 'String', min:6, cached: true
+passwordType1 = TypeFactory 'String', min:6, cached: true
 
-p2 = Type 'String', min:6, cached: true
-p3 = Type 'String', min:6, cached: {name: 'Password'}
+p2 = TypeFactory 'String', min:6, cached: true
+p3 = TypeFactory 'String', min:6, cached: {name: 'Password'}
 assert p2 is passwordType1
 assert p3 is passwordType
 assert passwordType isnt passwordType1
@@ -182,21 +183,21 @@ more detail see [cache-factory](https://github.com/snowyu/cache-factory)
 See [abstract-type][abstract-type].
 
 ```coffee
-Type  = require 'type-info'
-Value = Type.Value
+TypeFactory  = require 'type-info'
+Value = TypeFactory.Value
 
 # get number type info object
 # you can treat it as a global temporary type object.
-num = Type 'Number'
-assert.equal num, Type('Number')
+num = TypeFactory 'Number'
+assert.equal num, TypeFactory('Number')
 
 # get a new number type info object(Virtual Type):
 # create a virtual type object always if the options exists:
-number = Type 'Number', min:1, max:6
+number = TypeFactory 'Number', min:1, max:6
 assert.notEqual number, num
 
 # get Number Type Class(Primitive Type):
-NumberType = Type.registeredClass 'Number'
+NumberType = TypeFactory.registeredClass 'Number'
 
 # create a number value:
 n = Value(2) # try to guess the value type.
